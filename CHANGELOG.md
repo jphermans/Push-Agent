@@ -9,6 +9,44 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.6] - 2026-09-12
+
+### Fixed
+- **Saved Pushover configuration is no longer wiped on plugin
+  update.** Agent Zero's framework invokes ``uninstall()`` as part
+  of the code-update flow (followed by ``install()`` on the new
+  files), and the previous ``hooks.py`` called
+  ``reset_config()`` inside ``uninstall()``. That wiped the saved
+  ``config.json`` (token, user key, defaults, emergency settings,
+  advanced settings) every time the plugin was updated, forcing
+  the user to re-enter their Pushover credentials on every
+  release.
+
+  1.1.6 fixes that with two complementary safeguards:
+
+  1. ``uninstall()`` no longer calls ``reset_config()`` and is
+     effectively a log-only no-op for the saved configuration.
+     The Setup page's explicit **Reset Pushover Configuration**
+     button still wipes the config through the dedicated
+     ``/api/plugins/push_zero/reset`` endpoint, so a full reset is
+     always available when the user genuinely wants one.
+
+  2. As defense in depth, ``pre_update()`` and ``install()`` now
+     back up ``config.json`` to a fresh, owner-only file in
+     ``/tmp`` (``push_zero_config_backup_*.json``) before any
+     potentially-destructive step and restore it once the install
+     completes. The restore step is skipped when a fresh
+     config.json has already been written during the install,
+     so the backup never overwrites a freshly-saved config.
+
+### Notes
+- Lifecycle-only change. No runtime, configuration, route, theme,
+  or API behaviour changed. The 49-test suite carries forward
+  unchanged.
+- ``hooks.py`` remains the sole owner of ``install`` /
+  ``pre_update`` / ``uninstall`` per the Agent Zero lifecycle
+  contract; no ``execute.py`` was added or relied upon.
+
 ## [1.1.5] - 2026-09-12
 
 ### Fixed
