@@ -679,3 +679,16 @@ _(no changes yet)_
 - TLS verification enforced via `ssl.create_default_context()`.
 - HTML and monospace formatting cannot be enabled simultaneously.
 - Emergency retry and expire bounds enforced before every send.
+
+## [1.1.15] - 2026-09-12
+
+### Critical
+- **send_message now normalises the priority field before submission.** Pushover's `/1/messages.json` endpoint rejects any priority value that is not one of `{-2, -1, 0, 1, 2}`; earlier versions POSTed the payload's `priority` value verbatim, so callers passing friendly names (e.g. `"normal"`, `"emergency"`, `"high"`) received a 400 with `errors=['priority is invalid']`. The friendly-name -> integer conversion is now applied inside `send_message()`, so callers can safely pass any of `lowest | low | normal | high | emergency` (case-insensitive) or the integer form. Unknown values raise `ValueError` before any HTTP traffic, surfacing a clear error to the caller.
+
+### Tests
+- New `tests/test_client.py` cases cover `lowest/low/normal/high/emergency` -> `-2/-1/0/1/2`, integer passthrough, numeric strings, and unknown-string rejection.
+
+### Notes
+- No API contract change for tools; behaviour is strictly more permissive.
+- No change to credit/quota usage.
+- No change to priority-default-on-omission behaviour (Pushover still applies the system default when the field is absent).

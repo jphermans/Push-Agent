@@ -441,13 +441,32 @@ class PushoverClient:
     # ------------------------------------------------------------------
 
     def send_message(self, payload: dict[str, Any]) -> PushoverResult:
-        """POST to ``/1/messages.json``."""
+        """POST to ``/1/messages.json``.
+
+        Normalises the ``priority`` field before submission. Pushover's API
+        only accepts integers in ``{-2, -1, 0, 1, 2}``; the helper accepts
+        friendly names ("lowest" | "low" | "normal" | "high" | "emergency")
+        and converts them to the corresponding integer before the POST.
+        Unknown values raise ``ValueError`` before any HTTP traffic, so
+        callers get a precise error instead of an opaque 400 from Pushover.
+        """
         # Strip empty fields so Pushover doesn't reject optional ones.
         cleaned: dict[str, Any] = {}
         for key, value in payload.items():
             if value in _VOID:
                 continue
             cleaned[key] = value
+        # Priority normalisation: friendly -> int. Done here (and not in
+        # _post) so the conversion applies only to outbound messages and
+        # not to receipts/sounds/limits/validate endpoints.
+        if "priority" in cleaned:
+            try:
+                cleaned["priority"] = int(normalize_priority(cleaned["priority"]))
+            except ValueError as exc:
+                return self._fail(
+                    str(exc),
+                    endpoint="messages/send",
+                )
         cleaned.setdefault("token", self.token)
         cleaned.setdefault("user", self.user)
         return self._post(PUSHOVER_MESSAGE_PATH, cleaned)
