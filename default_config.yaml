@@ -1,0 +1,43 @@
+# Pushover Plugin Default Configuration
+# All credentials are intentionally empty in this default file.
+# Real values must be provided by the user through the Setup page.
+
+# Pushover account credentials.
+# Obtain your User Key from https://pushover.net/ and your Application/API
+# Token by creating an application at https://pushover.net/apps/build.
+token: ""
+user: ""
+
+# Optional fallback device name (leave blank to send to all devices).
+device: ""
+
+# Notification defaults used by the agent tool and the Setup page
+# test notification. Empty values mean "use the Pushover default".
+defaults:
+  title: "Agent Zero"
+  priority: "normal"          # lowest | low | normal | high | emergency
+  sound: ""                   # empty -> omit (User default); use sounds API for known values
+  device: ""                  # empty -> all devices
+  ttl: ""                     # numeric seconds; empty -> no expiry
+  url: ""
+  url_title: ""
+  html: false
+  monospace: false
+
+# Emergency notification defaults. Emergency notifications repeat until
+# acknowledged or until expiration. They require priority = emergency.
+emergency:
+  retry: 60                   # 30..86400 seconds; recommended default 60
+  expire: 3600                # 30..10800 seconds; 0 = never expire; recommended default 3600
+  callback: ""                # Optional acknowledgment URL
+
+# Per-request defaults applied to all notifications.
+advanced:
+  timeout: 15                 # HTTP timeout in seconds (recommended 10..15)
+  debug: false                # Enable verbose API logging (credentials are always masked)
+
+# Default tags for notifications. Used only when the tool call passes "tags".
+tags: []
+
+# Default callback URL applied to all notifications when set.
+callback: ""

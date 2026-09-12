@@ -1,0 +1,154 @@
+"""Pushover plugin configuration helpers.
+
+These helpers read and write the plugin configuration using the Agent Zero
+framework, including credential masking for UI consumption. They never print
+or return the raw ``token`` / ``user`` values to anyone but the Pushover
+HTTP client.
+"""
+
+from __future__ import annotations
+
+import copy
+from typing import Any
+
+from helpers import plugins as core_plugins
+from usr.plugins.pushover.helpers.pushover_client import mask_identifier
+
+
+PLUGIN_NAME: str = "pushover"
+
+
+def get_raw_config(agent: Any | None = None) -> dict[str, Any]:
+    """Return the plugin's runtime configuration as a dict.
+
+    Falls back to ``default_config.yaml`` when nothing has been saved yet.
+    """
+    cfg = core_plugins.get_plugin_config(PLUGIN_NAME, agent=agent) or {}
+    if not isinstance(cfg, dict):
+        return {}
+    return cfg
+
+
+def get_masked_config(agent: Any | None = None) -> dict[str, Any]:
+    """Return the plugin configuration with credentials safely masked.
+
+    Use this when rendering the Setup page so that even a logged-in user
+    never sees the full token or user key.
+    """
+    cfg = copy.deepcopy(get_raw_config(agent=agent))
+    cfg["token"] = mask_identifier(cfg.get("token", "") or "")
+    cfg["user"] = mask_identifier(cfg.get("user", "") or "")
+    return cfg
+
+
+def get_credentials(agent: Any | None = None) -> tuple[str, str]:
+    """Return ``(token, user)`` for direct use by the HTTP client.
+
+    No masking - this is intended for the client only.
+    """
+    cfg = get_raw_config(agent=agent)
+    token = (cfg.get("token") or "").strip()
+    user = (cfg.get("user") or "").strip()
+    return token, user
+
+
+def is_configured(agent: Any | None = None) -> bool:
+    """Return ``True`` when both token and user key are stored."""
+    token, user = get_credentials(agent=agent)
+    return bool(token) and bool(user)
+
+
+def status_snapshot(agent: Any | None = None) -> dict[str, Any]:
+    """Return a setup-status snapshot for the Setup page."""
+    cfg = get_raw_config(agent=agent)
+    token, user = get_credentials(agent=agent)
+    return {
+        "configured": bool(token) and bool(user),
+        "token_set": bool(token),
+        "user_set": bool(user),
+        "masked_token": mask_identifier(token),
+        "masked_user": mask_identifier(user),
+        "has_defaults": bool(cfg.get("defaults")),
+        "emergency_retry": (cfg.get("emergency", {}) or {}).get("retry"),
+        "emergency_expire": (cfg.get("emergency", {}) or {}).get("expire"),
+        "timeout": (cfg.get("advanced", {}) or {}).get("timeout"),
+        "debug": bool((cfg.get("advanced", {}) or {}).get("debug", False)),
+    }
+
+
+def ensure_defaults(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Fill in missing keys with safe defaults; never overwrite user input."""
+    out = copy.deepcopy(cfg) if isinstance(cfg, dict) else {}
+    out.setdefault("token", "")
+    out.setdefault("user", "")
+    out.setdefault("device", "")
+    out.setdefault("defaults", {})
+    defaults = out["defaults"] or {}
+    defaults.setdefault("title", "Agent Zero")
+    defaults.setdefault("priority", "normal")
+    defaults.setdefault("sound", "")
+    defaults.setdefault("device", "")
+    defaults.setdefault("ttl", "")
+    defaults.setdefault("url", "")
+    defaults.setdefault("url_title", "")
+    defaults.setdefault("html", False)
+    defaults.setdefault("monospace", False)
+    out["defaults"] = defaults
+
+    out.setdefault("emergency", {})
+    emergency = out["emergency"] or {}
+    emergency.setdefault("retry", 60)
+    emergency.setdefault("expire", 3600)
+    emergency.setdefault("callback", "")
+    out["emergency"] = emergency
+
+    out.setdefault("advanced", {})
+    advanced = out["advanced"] or {}
+    advanced.setdefault("timeout", 15)
+    advanced.setdefault("debug", False)
+    out["advanced"] = advanced
+
+    out.setdefault("tags", [])
+    out.setdefault("callback", "")
+    return out
+
+
+def save_config(config: dict[str, Any]) -> dict[str, Any]:
+    """Persist the supplied config in the global plugin scope.
+
+    The agent scope is intentionally not used - per the project instructions,
+    Pushover settings are global per Agent Zero install.
+    """
+    if not isinstance(config, dict):
+        raise ValueError("config must be a dict")
+    payload = ensure_defaults(config)
+    core_plugins.save_plugin_config(
+        PLUGIN_NAME,
+        project_name="",
+        agent_profile="",
+        settings=payload,
+    )
+    return payload
+
+
+def reset_config() -> None:
+    """Erase all plugin-scope Pushover settings."""
+    core_plugins.save_plugin_config(
+        PLUGIN_NAME,
+        project_name="",
+        agent_profile="",
+        settings={},
+    )
+
+
+__all__ = [
+    "PLUGIN_NAME",
+    "get_raw_config",
+    "get_masked_config",
+    "get_credentials",
+    "is_configured",
+    "status_snapshot",
+    "ensure_defaults",
+    "save_config",
+    "reset_config",
+]

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Pushover Setup</title>
+  <script type="module">
+    import { store } from "/plugins/pushover/webui/setup-store.js";
+  </script>
+  <style>
+    /*
+     * Pushover Setup page styling.
+     *
+     * Visibility across both Agent Zero themes is achieved by:
+     * - `color-scheme: light dark;` so the browser picks the right UA
+     *   defaults (form controls, scrollbars, focus rings) for the
+     *   current theme.
+     * - `light-dark(<light>, <dark>)` for our plugin-specific tokens
+     *   so the same property resolves correctly in either mode.
+     * - Preferring the framework's own theme variables
+     *   (`--text-color`, `--bg-color`, `--border-color` …) over
+     *   hard-coded constants. If a variable is not defined by the
+     *   host page the `light-dark()` fallback still gives a
+     *   theme-appropriate value.
+     */
+    .po-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 80px 16px;
+      color-scheme: light dark;
+      color: light-dark(#1f2328, #e6e6e6);
+      background: light-dark(#ffffff, #181a1d);
+      font-family: inherit;
+    }
+    .po-page h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+    }
+    .po-page h2 {
+      font-size: 1.05rem;
+      margin: 28px 0 12px 0;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: light-dark(#4b5563, #9aa0a6);
+    }
+    .po-page .po-subtitle {
+      color: light-dark(#4b5563, #9aa0a6);
+      margin-bottom: 24px;
+    }
+    .po-status-card {
+      border: 1px solid light-dark(#d1d5db, #444);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      background: light-dark(#f7f8fa, #1f2125);
+      color: light-dark(#1f2328, #e6e6e6);
+    }
+    .po-status-card.connected { border-color: light-dark(#2e7d32, #4caf50); }
+    .po-status-card.error { border-color: light-dark(#b00020, #ef5350); }
+    .po-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .po-status-pill .po-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .po-status-pill.tone-connected {
+      background: light-dark(rgba(46, 125, 50, 0.14), rgba(46, 125, 50, 0.18));
+      color: light-dark(#2e7d32, #4caf50);
+    }
+    .po-status-pill.tone-connected .po-dot { background: light-dark(#2e7d32, #4caf50); }
+    .po-status-pill.tone-info {
+      background: light-dark(rgba(33, 150, 243, 0.14), rgba(33, 150, 243, 0.18));
+      color: light-dark(#1565c0, #82b1ff);
+    }
+    .po-status-pill.tone-info .po-dot { background: light-dark(#1565c0, #82b1ff); }
+    .po-status-pill.tone-error {
+      background: light-dark(rgba(244, 67, 54, 0.14), rgba(244, 67, 54, 0.18));
+      color: light-dark(#b00020, #f44336);
+    }
+    .po-status-pill.tone-error .po-dot { background: light-dark(#b00020, #f44336); }
+    .po-status-pill.tone-warn {
+      background: light-dark(rgba(255, 193, 7, 0.20), rgba(255, 193, 7, 0.18));
+      color: light-dark(#8a5a00, #ffca28);
+    }
+    .po-status-pill.tone-warn .po-dot { background: light-dark(#8a5a00, #ffca28); }
+    .po-status-detail { flex: 1 1 200px; min-width: 220px; }
+    .po-status-detail .po-sub {
+      margin-top: 4px;
+      font-size: 0.9rem;
+      color: light-dark(#4b5563, #9aa0a6);
+      word-break: break-word;
+    }
+    .po-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .po-field { display: flex; flex-direction: column; gap: 6px; }
+    .po-field > label {
+      font-size: 0.85rem;
+      color: light-dark(#4b5563, #aaa);
+      font-weight: 500;
+    }
+    .po-field > input, .po-field > select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid light-dark(#d1d5db, #444);
+      background: light-dark(#ffffff, #1f2125);
+      color: light-dark(#1f2328, #e6e6e6);
+      font-size: 0.95rem;
+    }
+    .po-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .po-btn {
+      cursor: pointer;
+      border: 1px solid light-dark(#d1d5db, #444);
+      background: light-dark(#f1f3f5, #2b2d31);
+      color: light-dark(#1f2328, #e6e6e6);
+      padding: 9px 14px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .po-btn:hover { background: light-dark(#e4e7eb, #3b3d41); }
+    .po-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+    .po-btn-primary {
+      background: light-dark(#2e7d32, #2e7d32);
+      border-color: light-dark(#2e7d32, #2e7d32);
+      color: #ffffff;
+    }
+    .po-btn-primary:hover { background: light-dark(#1b5e20, #1b5e20); }
+    .po-btn-danger {
+      background: transparent;
+      border-color: light-dark(#b00020, #ef5350);
+      color: light-dark(#b00020, #ff7a7a);
+    }
+    .po-btn-danger:hover {
+      background: light-dark(rgba(176, 0, 32, 0.08), rgba(176, 0, 32, 0.18));
+    }
+    .po-section {
+      border: 1px solid light-dark(#e5e7eb, #444);
+      border-radius: 8px;
+      padding: 18px 18px;
+      margin-bottom: 18px;
+      background: light-dark(#ffffff, #1c1e22);
+      color: light-dark(#1f2328, #e6e6e6);
+    }
+    .po-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+    .po-section-header h3 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .po-section-body { margin-top: 12px; }
+    .po-help-list {
+      margin: 4px 0 0 18px;
+      padding: 0;
+      color: light-dark(#4b5563, #aaa);
+      line-height: 1.6;
+    }
+    .po-progress {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      background: light-dark(#f1f3f5, #1f2125);
+      color: light-dark(#1f2328, #e6e6e6);
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+    .po-test-results {
+      list-style: none;
+      margin: 8px 0 0 0;
+      padding: 0;
+    }
+    .po-test-results li {
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: light-dark(#f7f8fa, #1f2125);
+      border: 1px solid light-dark(#e5e7eb, #444);
+      color: light-dark(#1f2328, #e6e6e6);
+      margin-bottom: 6px;
+    }
+    .po-test-results li.po-ok { border-left: 4px solid light-dark(#2e7d32, #4caf50); }
+    .po-test-results li.po-fail { border-left: 4px solid light-dark(#b00020, #ef5350); }
+    .po-muted {
+      color: light-dark(#4b5563, #aaa);
+      font-size: 0.85rem;
+    }
+    .po-checkbox {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      color: light-dark(#1f2328, #e6e6e6);
+    }
+    .po-empty-state {
+      border: 1px dashed light-dark(#c8ccd1, #555);
+      padding: 32px;
+      border-radius: 10px;
+      text-align: center;
+      margin-bottom: 24px;
+      background: light-dark(#f7f8fa, #1c1e22);
+      color: light-dark(#1f2328, #e6e6e6);
+    }
+    .po-empty-state h3 { margin-top: 0; }
+    .po-empty-state .po-btn { margin-top: 12px; }
+    .po-link {
+      color: light-dark(#1565c0, #82b1ff);
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div x-data x-init="$store.pushoverSetup && $store.pushoverSetup.init()"
+    x-destroy="$store.pushoverSetup && $store.pushoverSetup.cleanup()">
+    <template x-if="$store.pushoverSetup">
+      <div class="po-page">
+        <h1>Pushover Setup</h1>
+        <div class="po-subtitle">
+          Connect Agent Zero to
+          <a class="po-link" href="https://pushover.net/" target="_blank" rel="noopener">Pushover</a>
+          to receive push notifications from agents and automations.
+        </div>
+
+        <template x-if="$store.pushoverSetup.isFirstRun">
+          <div class="po-empty-state">
+            <h3>First-time setup</h3>
+            <p class="po-muted">You need:</p>
+            <ul style="text-align:left;max-width:420px;margin:8px auto;">
+              <li>A Pushover account</li>
+              <li>A Pushover User (or Group) Key</li>
+              <li>A Pushover Application / API Token</li>
+            </ul>
+            <p class="po-muted">
+              Pushover credentials are never displayed back to you after they are saved.
+            </p>
+            <a class="po-btn po-btn-primary" href="https://pushover.net/apps/build" target="_blank" rel="noopener">
+              Create Pushover token
+            </a>
+          </div>
+        </template>
+
+        <div class="po-status-card"
+          x-bind:class="$store.pushoverSetup.configured ? 'connected' : ($store.pushoverSetup.statusTone === 'error' ? 'error' : '')">
+          <div class="po-status-detail">
+            <span class="po-status-pill"
+              x-bind:class="'po-status-pill tone-' + ($store.pushoverSetup.configured ? 'connected' : ($store.pushoverSetup.statusTone === 'error' ? 'error' : ($store.pushoverSetup.statusTone === 'warn' ? 'warn' : 'info')))">
+              <span class="po-dot"></span>
+              <span x-text="$store.pushoverSetup.statusLabel()"></span>
+            </span>
+            <div class="po-sub" x-text="$store.pushoverSetup.statusMessage"></div>
+            <template x-if="$store.pushoverSetup.configured">
+              <div class="po-sub">
+                User key: <span x-text="$store.pushoverSetup.maskedUser"></span>
+                &nbsp;&middot;&nbsp;
+                Application token: <span x-text="$store.pushoverSetup.maskedToken"></span>
+              </div>
+            </template>
+          </div>
+          <div class="po-actions" style="flex-shrink:0;">
+            <button class="po-btn" x-bind:disabled="$store.pushoverSetup.testing"
+              x-on:click="$store.pushoverSetup.testConnection()">
+              <x-icon name="sync"></x-icon>
+              <span x-text="$store.pushoverSetup.testing ? 'Testing...' : 'Test Connection'"></span>
+            </button>
+            <button class="po-btn po-btn-primary" x-bind:disabled="$store.pushoverSetup.sending"
+              x-on:click="$store.pushoverSetup.sendTestNotification()">
+              <x-icon name="notifications"></x-icon>
+              <span x-text="$store.pushoverSetup.sending ? 'Sending...' : 'Send Test Notification'"></span>
+            </button>
+          </div>
+        </div>
+
+        <template x-if="$store.pushoverSetup.testResults && $store.pushoverSetup.testResults.length">
+          <div style="margin-bottom:18px;">
+            <h2>Connection results</h2>
+            <ul class="po-test-results">
+              <template x-for="(r, idx) in $store.pushoverSetup.testResults" x-bind:key="idx">
+                <li x-bind:class="r.ok ? 'po-ok' : 'po-fail'">
+                  <strong x-text="r.test"></strong>:&nbsp;
+                  <span x-text="r.message"></span>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+
+        <div class="po-section">
+          <div class="po-section-header">
+            <h3>Connection</h3>
+          </div>
+          <div class="po-section-body">
+            <div class="po-field">
+              <label>Application / API Token</label>
+              <input type="text" autocomplete="off" x-model="$store.pushoverSetup.fields.token"
+                placeholder="Paste your application token" />
+              <div class="po-muted">
+                Stored locally. Cleared from this page after save.
+                <template x-if="$store.pushoverSetup.configured">
+                  <span> Currently set: <span x-text="$store.pushoverSetup.maskedToken"></span></span>
+                </template>
+              </div>
+            </div>
+            <div class="po-field" style="margin-top:10px;">
+              <label>User / Group Key</label>
+              <input type="text" autocomplete="off" x-model="$store.pushoverSetup.fields.user"
+                placeholder="Paste your user or group key" />
+              <div class="po-muted">
+                <template x-if="$store.pushoverSetup.configured">
+                  <span>Currently set: <span x-text="$store.pushoverSetup.maskedUser"></span></span>
+                </template>
+              </div>
+            </div>
+            <div class="po-field" style="margin-top:10px;">
+              <label>Device (optional)</label>
+              <input type="text" autocomplete="off" x-model="$store.pushoverSetup.fields.device"
+                placeholder="e.g. iphone or ipad (leave blank for all devices)" />
+              <div class="po-muted">Configuring a device is optional. Leave blank to send to all devices.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="po-section">
+          <div class="po-section-header">
+            <h3>Notification Defaults</h3>
+          </div>
+          <div class="po-section-body">
+            <div class="po-grid">
+              <div class="po-field">
+                <label>Default title</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.title" />
+              </div>
+              <div class="po-field">
+                <label>Default priority</label>
+                <select x-model="$store.pushoverSetup.fields.priority">
+                  <template x-for="opt in $store.pushoverSetup.priorityOptions" x-bind:key="opt.value">
+                    <option x-bind:value="opt.value" x-text="opt.label"></option>
+                  </template>
+                </select>
+              </div>
+              <div class="po-field">
+                <label>Default sound</label>
+                <select x-model="$store.pushoverSetup.fields.sound">
+                  <template x-for="s in $store.pushoverSetup.sounds" x-bind:key="s.slug">
+                    <option x-bind:value="s.slug" x-text="s.label"></option>
+                  </template>
+                </select>
+                <div class="po-muted">"User default" leaves your Pushover sound preference unchanged.</div>
+              </div>
+              <div class="po-field">
+                <label>Default device</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.default_device"
+                  placeholder="All devices" />
+              </div>
+              <div class="po-field">
+                <label>Default TTL (seconds)</label>
+                <input type="number" min="0" x-model="$store.pushoverSetup.fields.ttl"
+                  placeholder="3600 = one hour" />
+                <div class="po-muted">Empty for Pushover default. Maximum 604800 (7 days).</div>
+              </div>
+              <div class="po-field">
+                <label>Default URL</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.url"
+                  placeholder="https://example.com" />
+              </div>
+              <div class="po-field">
+                <label>Default URL title</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.url_title"
+                  placeholder="Open dashboard" />
+              </div>
+              <div class="po-field">
+                <label>Default tags (comma-separated)</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.tags"
+                  placeholder="agent-zero, alerts" />
+              </div>
+              <div class="po-field">
+                <label>Default callback URL</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.default_callback"
+                  placeholder="https://example.com/callback" />
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+              <label class="po-checkbox">
+                <input type="checkbox" x-model="$store.pushoverSetup.fields.html"
+                  x-on:change="$store.pushoverSetup.toggleHtml()" />
+                <span>Enable HTML formatting</span>
+              </label>
+              <label class="po-checkbox">
+                <input type="checkbox" x-model="$store.pushoverSetup.fields.monospace"
+                  x-on:change="$store.pushoverSetup.toggleMonospace()" />
+                <span>Enable monospace formatting</span>
+              </label>
+              <div class="po-muted">HTML and monospace cannot both be enabled; enabling one disables the other.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="po-section">
+          <div class="po-section-header">
+            <h3>Emergency Notifications</h3>
+          </div>
+          <div class="po-section-body">
+            <p class="po-muted">
+              Emergency notifications repeat until acknowledged or until expiration.
+              They are only used when a notification is sent with <code>priority=emergency</code>.
+            </p>
+            <div class="po-grid">
+              <div class="po-field">
+                <label>Retry interval (seconds)</label>
+                <input type="number" min="30" x-model.number="$store.pushoverSetup.fields.retry" />
+                <div class="po-muted">Minimum 30 seconds. Recommended 60.</div>
+              </div>
+              <div class="po-field">
+                <label>Expire after (seconds)</label>
+                <input type="number" min="0" x-model.number="$store.pushoverSetup.fields.expire" />
+                <div class="po-muted">0 = never expire. Maximum 10800 (3 hours).</div>
+              </div>
+              <div class="po-field">
+                <label>Acknowledgment callback URL</label>
+                <input type="text" x-model="$store.pushoverSetup.fields.callback"
+                  placeholder="https://example.com/ack" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="po-section" x-data="{ adv: false }" x-effect="adv = $store.pushoverSetup.fields.debug || $store.pushoverSetup.fields.timeout != 15">
+          <div class="po-section-header" x-on:click="adv = !adv">
+            <h3>Advanced Settings</h3>
+            <x-icon x-bind:class="adv ? 'po-toggle' : 'po-toggle is-collapsed'" name="expand_more"></x-icon>
+          </div>
+          <div class="po-section-body" x-show="adv">
+            <div class="po-grid">
+              <div class="po-field">
+                <label>HTTP timeout (seconds)</label>
+                <input type="number" min="1" max="60" x-model.number="$store.pushoverSetup.fields.timeout" />
+                <div class="po-muted">Recommended 10 - 15 seconds.</div>
+              </div>
+            </div>
+            <label class="po-checkbox">
+              <input type="checkbox" x-model="$store.pushoverSetup.fields.debug" />
+              <span>Enable API debug logging (credentials are always masked)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="po-section">
+          <div class="po-section-header">
+            <h3>API Usage</h3>
+          </div>
+          <div class="po-section-body">
+            <template x-if="$store.pushoverSetup.loadingLimits">
+              <div class="po-muted">Loading...</div>
+            </template>
+            <template x-if="!$store.pushoverSetup.loadingLimits && $store.pushoverSetup.limits">
+              <div>
+                <div>Messages used:
+                  <strong x-text="$store.pushoverSetup.limits.used"></strong> /
+                  <strong x-text="$store.pushoverSetup.limits.limit"></strong>
+                </div>
+                <div class="po-progress" x-text="$store.pushoverSetup.progressBlocks"></div>
+                <div class="po-muted" x-show="$store.pushoverSetup.limits.remaining != null">
+                  Remaining: <span x-text="$store.pushoverSetup.limits.remaining"></span>
+                </div>
+                <div class="po-muted" x-show="$store.pushoverSetup.limits.reset">
+                  Reset: <span x-text="$store.pushoverSetup.limits.reset"></span>
+                </div>
+              </div>
+            </template>
+            <template x-if="!$store.pushoverSetup.loadingLimits && !$store.pushoverSetup.limits">
+              <div class="po-muted">
+                Pushover did not return usage information.
+                <span x-show="$store.pushoverSetup.limitsError" x-text="$store.pushoverSetup.limitsError"></span>
+              </div>
+            </template>
+            <div style="margin-top:10px;">
+              <button class="po-btn" x-bind:disabled="$store.pushoverSetup.loadingLimits"
+                x-on:click="$store.pushoverSetup.refreshLimits()">
+                <x-icon name="refresh"></x-icon>
+                Refresh usage
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="po-actions" style="justify-content:space-between;">
+          <div class="po-actions">
+            <button class="po-btn po-btn-primary" x-bind:disabled="$store.pushoverSetup.saving"
+              x-on:click="$store.pushoverSetup.save()">
+              <x-icon name="save"></x-icon>
+              <span x-text="$store.pushoverSetup.saving ? 'Saving...' : 'Save Configuration'"></span>
+            </button>
+            <button class="po-btn" x-bind:disabled="$store.pushoverSetup.testing"
+              x-on:click="$store.pushoverSetup.testConnection()">
+              <x-icon name="sync"></x-icon>
+              <span x-text="$store.pushoverSetup.testing ? 'Testing...' : 'Test Connection'"></span>
+            </button>
+            <button class="po-btn po-btn-primary" x-bind:disabled="$store.pushoverSetup.sending"
+              x-on:click="$store.pushoverSetup.sendTestNotification()">
+              <x-icon name="notifications"></x-icon>
+              <span x-text="$store.pushoverSetup.sending ? 'Sending...' : 'Send Test Notification'"></span>
+            </button>
+          </div>
+          <button class="po-btn po-btn-danger" x-on:click="$store.pushoverSetup.resetConfig()">
+            <x-icon name="delete"></x-icon>
+            Reset Pushover Configuration
+          </button>
+        </div>
+
+        <div class="po-section" style="margin-top:32px;">
+          <div class="po-section-header">
+            <h3>Help</h3>
+          </div>
+          <div class="po-section-body">
+            <ol class="po-help-list">
+              <li>Create or log into your <a class="po-link" href="https://pushover.net/" target="_blank" rel="noopener">Pushover</a> account.</li>
+              <li>Copy your User Key from the Pushover dashboard.</li>
+              <li>Create an Application/API token at <a class="po-link" href="https://pushover.net/apps/build" target="_blank" rel="noopener">pushover.net/apps/build</a>.</li>
+              <li>Enter both values above and click <strong>Save Configuration</strong>.</li>
+              <li>Click <strong>Test Connection</strong> to verify.</li>
+              <li>Click <strong>Send Test Notification</strong> to send a real test message.</li>
+            </ol>
+            <p class="po-muted" style="margin-top:8px;">
+              See the plugin README at
+              <code>/a0/usr/plugins/pushover/README.md</code> for more details.
+            </p>
+          </div>
+        </div>
+      </div>
+    </template>
+  </div>
+</body>
+</html>

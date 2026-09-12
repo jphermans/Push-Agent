@@ -1,0 +1,36 @@
+# Agent Zero Plugin Hub entry — submission template
+#
+# This file is the submission entry used by `agent0ai/a0-plugins` to
+# publish Pushover in the Plugin Hub. It is NOT loaded by the Agent
+# Zero runtime — the runtime reads the plugin's own `plugin.yaml`.
+# When ready to publish:
+#
+#   1. Create the GitHub repository (see contibute.md → "Resolve
+#      repository owner/name") under your own account or org.
+#   2. Update `github:` below to that URL.
+#   3. Fork https://github.com/agent0ai/a0-plugins.
+#   4. Copy this file (renamed to `index.yaml`) into
+#      `plugins/pushover/index.yaml` in your fork and a copy of
+#      `thumbnail.png` beside it.
+#   5. Update `screenshots:` once you have screen captures.
+#   6. Run scripts/validate_plugin_submission.py from the Index repo
+#      against your pushed branch.
+#
+# Field limits (re-check the latest `agent0ai/a0-plugins` README
+# before merging; copied limits can age):
+#   - title:        up to 50 chars
+#   - description:  up to 500 chars
+#   - index.yaml:   up to 2000 chars total
+#   - tags:         up to 5
+#   - screenshots:  up to 5, each ≤ 2 MB
+#   - thumbnail:    ≤ 20 KB, square PNG/JPEG/WebP
+
+title: Pushover
+description: Send push notifications from Agent Zero through Pushover. Includes an agent-callable notification tool, a dedicated Setup page, connection testing, emergency notifications with receipts, devices, sounds, URLs, TTL and application API usage.
+github: https://github.com/TODO-OWNER/pushover
+tags:
+  - notifications
+  - tools
+  - external-services
+  - productivity
+  - automation

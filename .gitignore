@@ -1,0 +1,42 @@
+# Agent Zero local runtime artifacts (never committed when forking /
+# publishing the plugin repository).
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.python-version
+.venv/
+.conda/
+
+# Plugin runtime toggle/state created by the A0 plugin manager.
+.toggle-*
+
+# Editor / OS noise.
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Test / coverage caches.
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Local-only secrets / overrides.
+.env
+.env.*
+*.local.yaml
+*.local.yml
+usr_state/
+data/runtime/
+
+# Build / dist artefacts produced after publication is finalised.
+dist/
+build/
+*.egg-info/
+*.tar.gz
+*.whl
