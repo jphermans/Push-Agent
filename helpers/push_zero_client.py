@@ -38,6 +38,14 @@ PUSHOVER_API_BASE: str = "https://api.pushover.net"
 PUSHOVER_MESSAGE_PATH: str = "/1/messages.json"
 PUSHOVER_SOUNDS_PATH: str = "/1/sounds.json"
 PUSHOVER_LIMITS_PATH: str = "/1/apps/limits.json"
+# POST /1/users/validate.json validates the configured application token
+# AND user (or group) key in a single non-destructive call. It does NOT
+# leave a notification behind and does NOT count against the application's
+# monthly quota. This is the right endpoint for the Setup page's
+# "Test Connection" button, which previously called /1/apps/limits.json
+# and could surface a misleading 404 "resource not found" when the
+# application had been disabled or the endpoint changed.
+PUSHOVER_VALIDATE_PATH: str = "/1/users/validate.json"
 PUSHOVER_CANCEL_PATH: str = "/1/receipts/{receipt}/cancel.json"
 PUSHOVER_RECEIPT_PATH: str = "/1/receipts/{receipt}.json"
 
@@ -452,6 +460,25 @@ class PushoverClient:
         """GET to ``/1/apps/limits.json``. Requires the app's secret (we use token)."""
         return self._post(PUSHOVER_LIMITS_PATH, {"token": self.token})
 
+    def validate_credentials(self) -> PushoverResult:
+        """POST to ``/1/users/validate.json``.
+
+        Pushover's dedicated credential-validation endpoint. Confirms both
+        the application token AND the user (or group) key in a single
+        non-destructive call. Does NOT leave a notification behind and does
+        NOT count against the application's monthly quota.
+
+        Returns a successful :class:`PushoverResult` (status=200) only when
+        Pushover accepts both credentials. On any 4xx response Pushover
+        returns a JSON body with an ``errors`` array (e.g. ``["application
+        token is invalid"]``), which is surfaced through the standard
+        error-mapping helpers.
+        """
+        return self._post(
+            PUSHOVER_VALIDATE_PATH,
+            {"token": self.token, "user": self.user},
+        )
+
     def get_receipt(self, receipt: str) -> PushoverResult:
         receipt = (receipt or "").strip()
         if not receipt:
@@ -467,18 +494,17 @@ class PushoverClient:
         return self._post(path, {"token": self.token})
 
     def validate_connection(self) -> PushoverResult:
-        """Cheap credential probe: send ``/1/users/validate.json`` style check
-        by hitting the apps/limits endpoint, which validates the app token
-        without leaving a notification behind.
+        """Cheap credential probe.
 
-        Pushover doesn't expose a dedicated validate endpoint for arbitrary
-        users, but ``apps/limits.json`` accepts ``token`` (the application
-        secret) and returns 200 only for valid application tokens. For the
-        user key we additionally rely on the message endpoint dry-run
-        since Pushover does not provide a separate ``users/validate`` route.
+        Uses Pushover's dedicated ``/1/users/validate.json`` endpoint to
+        confirm both the application token and the user (or group) key in
+        a single non-destructive call. This is the right endpoint for the
+        Setup page's "Test Connection" button; previous versions called
+        ``/1/apps/limits.json`` here, which only validates the token and
+        could surface a misleading 404 "resource not found" when the
+        application had been disabled or the limits endpoint changed.
         """
-        limits = self.get_app_limits()
-        return limits
+        return self.validate_credentials()
 
     # ------------------------------------------------------------------
     # Internal helpers
@@ -754,5 +780,6 @@ __all__ = [
     "validate_emergency_expire",
     "validate_tags",
     "PUSHOVER_API_BASE",
+    "PUSHOVER_VALIDATE_PATH",
     "DEFAULT_TIMEOUT_SECONDS",
 ]

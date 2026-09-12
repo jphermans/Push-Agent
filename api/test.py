@@ -56,69 +56,58 @@ class Test(ApiHandler):
 
         client = PushoverClient(token=token, user=user, timeout=timeout, debug=debug)
 
-        # 1. Validate the application token by hitting the cheap limits endpoint.
+        # 1. Validate the application token AND the user (or group) key in
+        # a single non-destructive call via Pushover's dedicated
+        # /1/users/validate.json endpoint. This is the right endpoint for
+        # the Setup page's "Test Connection" button; previous versions
+        # called /1/apps/limits.json here, which only validates the token
+        # and could surface a misleading 404 "resource not found" when
+        # the application had been disabled or the limits endpoint
+        # returned a non-200 response for any other reason.
         try:
-            limits = client.get_app_limits()
-            if limits.success and limits.status == 200:
+            validate = client.validate_credentials()
+            if validate.success and validate.status == 200:
                 results.append(
                     {
-                        "test": "Application Token",
+                        "test": "Credentials",
                         "ok": True,
-                        "message": "Application token is valid.",
+                        "message": (
+                            "Application token and user (or group) key are valid."
+                        ),
                     }
                 )
             else:
+                joined_errors = "; ".join(validate.errors)
+                if "application token" in joined_errors.lower() or "invalid token" in joined_errors.lower():
+                    token_message = validate.error or joined_errors or "Invalid application token."
+                    user_message = "Could not be validated because the application token is invalid."
+                elif "user" in joined_errors.lower() or "user key" in joined_errors.lower():
+                    token_message = "Application token is valid."
+                    user_message = validate.error or joined_errors or "Invalid user key."
+                else:
+                    detail = validate.error or joined_errors or "Pushover rejected the credentials."
+                    token_message = detail
+                    user_message = detail
                 results.append(
                     {
                         "test": "Application Token",
-                        "ok": False,
-                        "message": limits.error
-                        or "; ".join(limits.errors)
-                        or "Invalid application token.",
+                        "ok": validate.success,
+                        "message": token_message,
+                    }
+                )
+                results.append(
+                    {
+                        "test": "User Key",
+                        "ok": validate.success,
+                        "message": user_message,
                     }
                 )
         except Exception as exc:  # noqa: BLE001
             results.append(
                 {
-                    "test": "Application Token",
+                    "test": "Credentials",
                     "ok": False,
-                    "message": f"Could not validate the application token: {format_error(exc)}",
-                }
-            )
-
-        # 2. Validate the user key with a real send (lowest priority, dry message).
-        try:
-            send = client.send_message(
-                {
-                    "message": "Pushover connection test.",
-                    "title": "Agent Zero",
-                    "priority": -2,
-                }
-            )
-            if send.success:
-                results.append(
-                    {
-                        "test": "User Key",
-                        "ok": True,
-                        "message": "User key accepted. A lowest-priority test notification was sent.",
-                    }
-                )
-            else:
-                results.append(
-                    {
-                        "test": "User Key",
-                        "ok": False,
-                        "message": send.error
-                        or "; ".join(send.errors)
-                        or "Invalid user key.",
-                    }
-                )
-        except Exception as exc:  # noqa: BLE001
-            results.append(
-                {
-                    "test": "User Key",
-                    "ok": False,
-                    "message": f"Could not validate the user key: {format_error(exc)}",
+                    "message": f"Could not validate the Pushover credentials: {format_error(exc)}",
                 }
             )
 

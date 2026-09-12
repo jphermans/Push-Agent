@@ -9,6 +9,51 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.10] - 2026-09-12
+
+### Fixed
+- **Test Connection no longer reports a misleading "resource not
+  found".** The Setup page's "Test Connection" button previously
+  called `POST /1/apps/limits.json` to validate the application
+  token. That endpoint only validates the token, returns a 200
+  response without checking the user (or group) key, and could
+  surface a misleading 404 with a generic "resource not found"
+  body when the application had been disabled, the endpoint had
+  been rate-limited, or the URL had drifted for any other reason.
+  Two call paths (`api/test.py` step 1 and
+  `helpers/push_zero_client.py:validate_connection`) now use
+  Pushover's dedicated **`POST /1/users/validate.json`** endpoint
+  instead, which validates both the application token AND the
+  user (or group) key in a single non-destructive call, does NOT
+  leave a notification behind, and does NOT count against the
+  application's monthly quota.
+
+  The Setup page now reports a single "Credentials" result on
+  success ("Application token and user (or group) key are
+  valid.") and splits the failure case into clearly-named
+  "Application Token" / "User Key" results so the user knows
+  exactly which credential needs to be corrected.
+
+### Added
+- **`PUSHOVER_VALIDATE_PATH`** constant in
+  `helpers/push_zero_client.py` (the canonical path for the
+  validation endpoint; single source of truth for future changes).
+- **`PushoverClient.validate_credentials()`** method: thin
+  wrapper that POSTs `token` + `user` to `/1/users/validate.json`
+  and returns the standard `PushoverResult` envelope. Re-exported
+  in `__all__` so tools and API handlers can call it directly.
+
+### Notes
+- The previous step-2 message-send smoke test (`POST /1/messages.json`
+  with `priority=-2`) was removed because the new validate endpoint
+  already confirms the user key works. Removing it also avoids
+  the previous behaviour of leaving a real (lowest-priority) test
+  notification behind on every Test Connection click, which users
+  sometimes found surprising.
+- The `get_app_limits()` method is unchanged and is still used by
+  the Setup page's **API Usage** panel — that's the right endpoint
+  for retrieving the application's monthly quota.
+
 ## [1.1.9] - 2026-09-12
 
 ### Added
