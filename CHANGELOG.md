@@ -9,6 +9,38 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.8] - 2026-09-12
+
+### Changed
+- **Thumbnail updated to a user-supplied Pushover + Agent Zero
+  branded mark.** The previous 1.1.3 thumbnail was a stylized
+  coral panel with an Agent Zero "zero" ring and chevron. The
+  new thumbnail uses a tightly-cropped 128×128 square from the
+  centre of a user-supplied marketing banner, focusing on the
+  distinctive Pushover app tile (rounded blue square, italic
+  white P) with the red notification bell badge.
+
+  - Crop window: `510, 60, 1000, 550` from the 1672×941 source
+    (a 490×490 box centred on the Pushover tile).
+  - Resized to 128×128 with LANCZOS downsampling.
+  - Quantized to a 32-colour adaptive palette and saved as an
+    optimized PNG (compress_level=9). Final size: **3 175 bytes
+    (~3.1 KB)**, well under the A0 community ceiling of
+    20 KB.
+  - Both copies (repo-root `thumbnail.png` and
+    `webui/thumbnail.png`) are byte-identical (sha256
+    `8830d51243bd7ea96104ea394159a23ebb1404cfe84acd335f01f9597550dbc4`)
+    so the icon displays identically in the Plugins card, the
+    External-Services entry, and the Hub listing.
+
+### Notes
+- Asset-only PATCH. No runtime, configuration, route, theme, or
+  API behaviour changed. The on-disk `config.json` is not
+  touched by this change.
+- The 49-test suite carries forward unchanged; the thumbnail
+  is consumed only by the WebUI and Hub tooling, never by the
+  test suite.
+
 ## [1.1.7] - 2026-09-12
 
 ### Fixed
