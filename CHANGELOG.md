@@ -9,6 +9,41 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.9] - 2026-09-12
+
+### Added
+- **Automated version-label sync.** New `scripts/sync_version.py`
+  reads the canonical `version:` field from `plugin.yaml` and
+  rewrites any tracked file that contains a stale literal version
+  string. Currently covers the shields.io version badge and the
+  `Shipped at vX.Y.Z` subtitle in `README.md`. Idempotent:
+  running it twice with the same `plugin.yaml` version produces
+  the same content. Supports three modes:
+
+  - `python3 scripts/sync_version.py` (dry-run, shows planned diffs)
+  - `python3 scripts/sync_version.py --apply` (writes changes)
+  - `python3 scripts/sync_version.py --check` (CI-friendly exit
+    code; `0` when in sync, `1` when drift is detected)
+
+  The script intentionally avoids touching `plugin.yaml`,
+  `CHANGELOG.md`, or any test code so it cannot accidentally
+  rewrite release history or runtime configuration. The allowlist
+  lives at the top of the script and is the single source of
+  truth for which files carry version-bearing strings.
+
+### Fixed
+- **Drift between README version badge and `plugin.yaml`.**
+  The README's shields.io version badge and "Shipped at vX.Y.Z"
+  subtitle were hard-coded to `1.1.4` and had drifted through
+  five subsequent releases (1.1.5 .. 1.1.8). The sync script
+  brings them back in sync to `1.1.9` and prevents future drift
+  via the `--check` CI hook.
+
+### Notes
+- Tooling and docs only. No runtime, configuration, route, theme,
+  or API behaviour changed. The 49-test suite carries forward
+  unchanged.
+
 ## [1.1.8] - 2026-09-12
 
 ### Changed
