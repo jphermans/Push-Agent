@@ -9,6 +9,21 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.2] - 2026-09-12
+
+### Fixed
+- **Plugin-Hub submission entry now references the real target
+  repository.** `index.yaml` previously shipped with
+  `github: https://github.com/TODO-OWNER/push_zero` — a deliberately
+  inert placeholder so accidental publication was impossible. The
+  user supplied the public-repo URL `https://github.com/jphermans/Push-Agent`
+  in this session; `index.yaml` now points there. Override locally
+  if the plugin is later relocated.
+
+### Notes
+- Documentation-only change. No runtime, configuration, or theme
+  change. All 49 existing tests still pass.
+
 ## [1.1.1] - 2026-09-12
 
 ### Fixed

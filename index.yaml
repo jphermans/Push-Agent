@@ -7,7 +7,8 @@
 #
 #   1. Create the GitHub repository (see contibute.md → "Resolve
 #      repository owner/name") under your own account or org.
-#   2. Update `github:` below to that URL.
+#   2. `github:` is pre-pointed at https://github.com/jphermans/Push-Agent
+#      (override here if the repository is relocated).
 #   3. Fork https://github.com/agent0ai/a0-plugins.
 #   4. Copy this file (renamed to `index.yaml`) into
 #      `plugins/push_zero/index.yaml` in your fork and a copy of
@@ -27,7 +28,7 @@
 
 title: Pushover
 description: Send push notifications from Agent Zero through Pushover. Includes an agent-callable notification tool, a dedicated Setup page, connection testing, emergency notifications with receipts, devices, sounds, URLs, TTL and application API usage.
-github: https://github.com/TODO-OWNER/push_zero
+github: https://github.com/jphermans/Push-Agent
 tags:
   - notifications
   - tools
