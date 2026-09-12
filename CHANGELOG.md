@@ -9,6 +9,35 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.1] - 2026-09-12
+
+### Fixed
+- **Setup page now follows the host theme.** Previously the page
+  used `light-dark(<light>, <dark>)` with `color-scheme: light
+  dark`, which responded to the browser's `prefers-color-scheme`
+  instead of the Agent Zero host's actual theme. As a result the
+  page always looked dark whenever the browser reported dark
+  preference, regardless of which theme the user toggled in A0.
+  1.1.1 rewrites the CSS to consume the host's theme tokens
+  (`var(--color-background)`, `var(--color-text)`,
+  `var(--color-panel)`, `var(--color-border)`,
+  `var(--color-input)`, `var(--color-input-focus)`,
+  `var(--color-accent)`, `var(--color-highlight)`,
+  `var(--color-text-muted)`, `var(--color-warning-text)`,
+  `var(--color-background-hover)`) — the same neutral pointers
+  the host repoints when it swaps `body.dark-mode` <->
+  `body.light-mode`.
+- **Plugin icon now visible on the Plugins card and in the
+  External Services panel.** The framework detector reads
+  thumbnail from `webui/thumbnail.<ext>`
+  (`/a0/helpers/plugins.py:289-294`); the previous layout only
+  shipped the plugin-root `thumbnail.png`. 1.1.1 adds
+  `webui/thumbnail.png` as a copy so the icon now renders.
+
+### Notes
+- Pure presentation/asset fixes. No API, runtime, or configuration
+  schema change. All 49 existing tests still pass.
+
 ## [1.1.0] - 2026-09-12
 
 ### Changed

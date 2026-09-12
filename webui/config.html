@@ -10,45 +10,46 @@
     /*
      * Pushover Setup page styling.
      *
-     * Visibility across both Agent Zero themes is achieved by:
-     * - `color-scheme: light dark;` so the browser picks the right UA
-     *   defaults (form controls, scrollbars, focus rings) for the
-     *   current theme.
-     * - `light-dark(<light>, <dark>)` for our plugin-specific tokens
-     *   so the same property resolves correctly in either mode.
-     * - Preferring the framework's own theme variables
-     *   (`--text-color`, `--bg-color`, `--border-color` …) over
-     *   hard-coded constants. If a variable is not defined by the
-     *   host page the `light-dark()` fallback still gives a
-     *   theme-appropriate value.
+     * The Agent Zero host toggles light / dark by swapping the
+     * `body.dark-mode` <-> `body.light-mode` class (see
+     * /a0/webui/index.html). Its `:root` exposes neutral pointer
+     * variables (`--color-background`, `--color-text`, ...)
+     * that the host repoints to the corresponding
+     * `--color-*-dark` / `--color-*-light` palette for the active
+     * theme. We consume those neutral pointers directly so the
+     * plugin page follows the host theme without flicker.
+     *
+     * We avoid `light-dark()` here because that would respond to
+     * the browser's `prefers-color-scheme`, not to the host's
+     * in-page theme toggle.
      */
     .po-page {
       max-width: 960px;
       margin: 0 auto;
       padding: 24px 16px 80px 16px;
-      color-scheme: light dark;
-      color: light-dark(#1f2328, #e6e6e6);
-      background: light-dark(#ffffff, #181a1d);
-      font-family: inherit;
+      color: var(--color-text);
+      background: var(--color-background);
+      font-family: var(--font-family-main);
     }
     .po-page h1 {
       font-size: 1.6rem;
       font-weight: 600;
       margin: 0 0 4px 0;
+      color: var(--color-text);
     }
     .po-page h2 {
       font-size: 1.05rem;
       margin: 28px 0 12px 0;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      color: light-dark(#4b5563, #9aa0a6);
+      color: var(--color-text-muted);
     }
     .po-page .po-subtitle {
-      color: light-dark(#4b5563, #9aa0a6);
+      color: var(--color-text-muted);
       margin-bottom: 24px;
     }
     .po-status-card {
-      border: 1px solid light-dark(#d1d5db, #444);
+      border: 1px solid var(--color-border);
       border-radius: 8px;
       padding: 16px 18px;
       margin-bottom: 18px;
@@ -57,11 +58,12 @@
       justify-content: space-between;
       gap: 16px;
       flex-wrap: wrap;
-      background: light-dark(#f7f8fa, #1f2125);
-      color: light-dark(#1f2328, #e6e6e6);
+      background: var(--color-panel);
+      color: var(--color-text);
     }
-    .po-status-card.connected { border-color: light-dark(#2e7d32, #4caf50); }
-    .po-status-card.error { border-color: light-dark(#b00020, #ef5350); }
+    .po-status-card.connected { border-color: #2e7d32; }
+    body.light-mode .po-status-card.connected { border-color: #2e7d32; }
+    .po-status-card.error { border-color: var(--color-accent); }
     .po-status-pill {
       display: inline-flex;
       align-items: center;
@@ -72,36 +74,23 @@
       font-weight: 600;
     }
     .po-status-pill .po-dot {
-      width: 8px;
-      height: 8px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       display: inline-block;
     }
-    .po-status-pill.tone-connected {
-      background: light-dark(rgba(46, 125, 50, 0.14), rgba(46, 125, 50, 0.18));
-      color: light-dark(#2e7d32, #4caf50);
-    }
-    .po-status-pill.tone-connected .po-dot { background: light-dark(#2e7d32, #4caf50); }
-    .po-status-pill.tone-info {
-      background: light-dark(rgba(33, 150, 243, 0.14), rgba(33, 150, 243, 0.18));
-      color: light-dark(#1565c0, #82b1ff);
-    }
-    .po-status-pill.tone-info .po-dot { background: light-dark(#1565c0, #82b1ff); }
-    .po-status-pill.tone-error {
-      background: light-dark(rgba(244, 67, 54, 0.14), rgba(244, 67, 54, 0.18));
-      color: light-dark(#b00020, #f44336);
-    }
-    .po-status-pill.tone-error .po-dot { background: light-dark(#b00020, #f44336); }
-    .po-status-pill.tone-warn {
-      background: light-dark(rgba(255, 193, 7, 0.20), rgba(255, 193, 7, 0.18));
-      color: light-dark(#8a5a00, #ffca28);
-    }
-    .po-status-pill.tone-warn .po-dot { background: light-dark(#8a5a00, #ffca28); }
+    .po-status-pill.tone-connected { background: rgba(46, 125, 50, 0.18); color: #4caf50; }
+    .po-status-pill.tone-connected .po-dot { background: #4caf50; }
+    .po-status-pill.tone-info { background: rgba(33, 150, 243, 0.18); color: var(--color-highlight); }
+    .po-status-pill.tone-info .po-dot { background: var(--color-highlight); }
+    .po-status-pill.tone-error { background: rgba(244, 67, 54, 0.18); color: var(--color-accent); }
+    .po-status-pill.tone-error .po-dot { background: var(--color-accent); }
+    .po-status-pill.tone-warn { background: rgba(255, 193, 7, 0.18); color: var(--color-warning-text); }
+    .po-status-pill.tone-warn .po-dot { background: var(--color-warning-text); }
     .po-status-detail { flex: 1 1 200px; min-width: 220px; }
     .po-status-detail .po-sub {
       margin-top: 4px;
       font-size: 0.9rem;
-      color: light-dark(#4b5563, #9aa0a6);
+      color: var(--color-text-muted);
       word-break: break-word;
     }
     .po-grid {
@@ -113,28 +102,30 @@
     .po-field { display: flex; flex-direction: column; gap: 6px; }
     .po-field > label {
       font-size: 0.85rem;
-      color: light-dark(#4b5563, #aaa);
+      color: var(--color-text-muted);
       font-weight: 500;
     }
     .po-field > input, .po-field > select {
       padding: 8px 10px;
       border-radius: 6px;
-      border: 1px solid light-dark(#d1d5db, #444);
-      background: light-dark(#ffffff, #1f2125);
-      color: light-dark(#1f2328, #e6e6e6);
+      border: 1px solid var(--color-border);
+      background: var(--color-input);
+      color: var(--color-text);
       font-size: 0.95rem;
     }
+    .po-field > input:focus, .po-field > select:focus {
+      outline: none;
+      border-color: var(--color-highlight);
+      background: var(--color-input-focus);
+    }
     .po-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 8px;
+      display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;
     }
     .po-btn {
       cursor: pointer;
-      border: 1px solid light-dark(#d1d5db, #444);
-      background: light-dark(#f1f3f5, #2b2d31);
-      color: light-dark(#1f2328, #e6e6e6);
+      border: 1px solid var(--color-border);
+      background: var(--color-panel);
+      color: var(--color-text);
       padding: 9px 14px;
       border-radius: 6px;
       font-size: 0.95rem;
@@ -142,29 +133,29 @@
       align-items: center;
       gap: 6px;
     }
-    .po-btn:hover { background: light-dark(#e4e7eb, #3b3d41); }
+    .po-btn:hover { background: var(--color-input-focus); }
     .po-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
     .po-btn-primary {
-      background: light-dark(#2e7d32, #2e7d32);
-      border-color: light-dark(#2e7d32, #2e7d32);
+      background: #2e7d32;
+      border-color: #2e7d32;
       color: #ffffff;
     }
-    .po-btn-primary:hover { background: light-dark(#1b5e20, #1b5e20); }
+    .po-btn-primary:hover { background: #1b5e20; }
     .po-btn-danger {
       background: transparent;
-      border-color: light-dark(#b00020, #ef5350);
-      color: light-dark(#b00020, #ff7a7a);
+      border-color: var(--color-accent);
+      color: var(--color-accent);
     }
     .po-btn-danger:hover {
-      background: light-dark(rgba(176, 0, 32, 0.08), rgba(176, 0, 32, 0.18));
+      background: var(--color-background-hover);
     }
     .po-section {
-      border: 1px solid light-dark(#e5e7eb, #444);
+      border: 1px solid var(--color-border);
       border-radius: 8px;
-      padding: 18px 18px;
+      padding: 18px;
       margin-bottom: 18px;
-      background: light-dark(#ffffff, #1c1e22);
-      color: light-dark(#1f2328, #e6e6e6);
+      background: var(--color-panel);
+      color: var(--color-text);
     }
     .po-section-header {
       display: flex;
@@ -182,58 +173,48 @@
     .po-help-list {
       margin: 4px 0 0 18px;
       padding: 0;
-      color: light-dark(#4b5563, #aaa);
+      color: var(--color-text-muted);
       line-height: 1.6;
     }
     .po-progress {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      background: light-dark(#f1f3f5, #1f2125);
-      color: light-dark(#1f2328, #e6e6e6);
+      font-family: var(--font-family-mono);
+      background: var(--color-input);
+      color: var(--color-text);
       padding: 6px 10px;
       border-radius: 6px;
       display: inline-block;
     }
-    .po-test-results {
-      list-style: none;
-      margin: 8px 0 0 0;
-      padding: 0;
-    }
+    .po-test-results { list-style: none; margin: 8px 0 0 0; padding: 0; }
     .po-test-results li {
       padding: 8px 12px;
       border-radius: 6px;
-      background: light-dark(#f7f8fa, #1f2125);
-      border: 1px solid light-dark(#e5e7eb, #444);
-      color: light-dark(#1f2328, #e6e6e6);
+      background: var(--color-input);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
       margin-bottom: 6px;
     }
-    .po-test-results li.po-ok { border-left: 4px solid light-dark(#2e7d32, #4caf50); }
-    .po-test-results li.po-fail { border-left: 4px solid light-dark(#b00020, #ef5350); }
-    .po-muted {
-      color: light-dark(#4b5563, #aaa);
-      font-size: 0.85rem;
-    }
+    .po-test-results li.po-ok { border-left: 4px solid #4caf50; }
+    .po-test-results li.po-fail { border-left: 4px solid var(--color-accent); }
+    .po-muted { color: var(--color-text-muted); font-size: 0.85rem; }
     .po-checkbox {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       margin-top: 6px;
-      color: light-dark(#1f2328, #e6e6e6);
+      color: var(--color-text);
     }
     .po-empty-state {
-      border: 1px dashed light-dark(#c8ccd1, #555);
+      border: 1px dashed var(--color-border);
       padding: 32px;
       border-radius: 10px;
       text-align: center;
       margin-bottom: 24px;
-      background: light-dark(#f7f8fa, #1c1e22);
-      color: light-dark(#1f2328, #e6e6e6);
+      background: var(--color-panel);
+      color: var(--color-text);
     }
     .po-empty-state h3 { margin-top: 0; }
     .po-empty-state .po-btn { margin-top: 12px; }
-    .po-link {
-      color: light-dark(#1565c0, #82b1ff);
-      text-decoration: underline;
-    }
+    .po-link { color: var(--color-highlight); text-decoration: underline; }
   </style>
 </head>
 <body>

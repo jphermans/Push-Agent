@@ -259,7 +259,8 @@ usr/plugins/push_zero/
 ├── webui/
 │   ├── main.html                 # dedicated Pushover Setup page (Plugins card)
 │   ├── config.html               # External Services panel entry (Settings → Pushover)
-│   └── setup-store.js
+│   ├── setup-store.js
+│   └── thumbnail.png             # 128×128 PNG used by `get_enhanced_plugins_list`
 ├── .gitignore                    # excludes __pycache__, .toggle-*, build/, etc.
 ├── index.yaml                    # Plugin-Hub submission entry (read by agent0ai/a0-plugins,
 │                                 # not by the runtime)
