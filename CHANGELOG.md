@@ -9,6 +9,51 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.7] - 2026-09-12
+
+### Fixed
+- **Setup page no longer appears to wipe saved credentials.**
+  After saving, the credential input fields were deliberately
+  cleared to keep plaintext out of the DOM, but the visible
+  helper text ("Stored locally. Cleared from this page after
+  save.") and the tiny greyed-out "Currently set: ****XXXX"
+  hint were easy to miss, so the credentials **looked**
+  wiped even though they were still safely on disk. The API
+  handler in `api/save.py` already preserved existing values
+  correctly: empty fields were interpreted as "leave the saved
+  value untouched", so first-time saves required both fields but
+  subsequent saves did not overwrite anything.
+
+  1.1.7 fixes the user-visible symptom by making the saved
+  state impossible to miss:
+
+  1. New `.po-saved-badge` style in `webui/main.html` — a
+     prominent green pill with a checkmark and the masked
+     value (e.g. "✓ Saved as ****AB12 · type a new value to
+     replace"), placed directly under each credential input.
+     The pill replaces the misleading "Cleared from this page
+     after save" copy and the easy-to-miss "Currently set:"
+     hint.
+  2. `setup-store.js` `refresh()` now populates
+     `fields.token` and `fields.user` with the masked display
+     after loading the status response, so navigating away and
+     back to the Setup page visibly shows the saved values.
+  3. `setup-store.js` `save()` now sets the input values to
+     the new masked display (e.g. `****AB12`) instead of
+     clearing them, so the user sees the save was successful
+     and can type to overwrite. Plaintext is never placed in
+     the DOM; only the masked form is shown.
+
+### Notes
+- UX-only change. No runtime, configuration, route, theme, or
+  API behaviour changed. The on-disk `config.json` is never
+  modified by this fix; the previous versions already
+  preserved the credentials correctly (this only changes what
+  the page shows after save or on reload).
+- The 49-test suite carries forward unchanged. The
+  `test_setup_store.py` / `test_validation.py` paths do not
+  cover the JS Alpine store, so no test changes are needed.
+
 ## [1.1.6] - 2026-09-12
 
 ### Fixed

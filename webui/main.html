@@ -196,6 +196,50 @@
     .po-test-results li.po-ok { border-left: 4px solid #4caf50; }
     .po-test-results li.po-fail { border-left: 4px solid var(--color-accent); }
     .po-muted { color: var(--color-text-muted); font-size: 0.85rem; }
+    .po-field-hint {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      margin-top: 2px;
+      flex-wrap: wrap;
+    }
+    .po-saved-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      background: rgba(46, 125, 50, 0.18);
+      color: #2e7d32;
+      border: 1px solid rgba(46, 125, 50, 0.4);
+    }
+    body.light-mode .po-saved-badge {
+      background: rgba(46, 125, 50, 0.14);
+      color: #1b5e20;
+      border-color: rgba(46, 125, 50, 0.45);
+    }
+    .po-saved-badge-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #2e7d32;
+      color: #ffffff;
+      font-size: 0.7rem;
+      line-height: 1;
+      font-weight: 700;
+    }
+    body.light-mode .po-saved-badge-icon { background: #1b5e20; }
+    .po-saved-badge strong {
+      font-family: var(--font-family-mono);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
     .po-checkbox {
       display: inline-flex;
       align-items: center;
@@ -301,10 +345,19 @@
               <label>Application / API Token</label>
               <input type="text" autocomplete="off" x-model="$store.push_zeroSetup.fields.token"
                 placeholder="Paste your application token" />
-              <div class="po-muted">
-                Stored locally. Cleared from this page after save.
+              <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">
-                  <span> Currently set: <span x-text="$store.push_zeroSetup.maskedToken"></span></span>
+                  <span class="po-saved-badge">
+                    <span class="po-saved-badge-icon" aria-hidden="true">&#10003;</span>
+                    Saved as <strong x-text="$store.push_zeroSetup.maskedToken"></strong>
+                    &middot; type a new value to replace
+                  </span>
+                </template>
+                <template x-if="!$store.push_zeroSetup.configured">
+                  <span class="po-muted">
+                    Get one at
+                    <a class="po-link" href="https://pushover.net/apps/build" target="_blank" rel="noopener">pushover.net/apps/build</a>.
+                  </span>
                 </template>
               </div>
             </div>
@@ -312,9 +365,19 @@
               <label>User / Group Key</label>
               <input type="text" autocomplete="off" x-model="$store.push_zeroSetup.fields.user"
                 placeholder="Paste your user or group key" />
-              <div class="po-muted">
+              <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">
-                  <span>Currently set: <span x-text="$store.push_zeroSetup.maskedUser"></span></span>
+                  <span class="po-saved-badge">
+                    <span class="po-saved-badge-icon" aria-hidden="true">&#10003;</span>
+                    Saved as <strong x-text="$store.push_zeroSetup.maskedUser"></strong>
+                    &middot; type a new value to replace
+                  </span>
+                </template>
+                <template x-if="!$store.push_zeroSetup.configured">
+                  <span class="po-muted">
+                    Find it on the
+                    <a class="po-link" href="https://pushover.net/" target="_blank" rel="noopener">Pushover dashboard</a>.
+                  </span>
                 </template>
               </div>
             </div>
