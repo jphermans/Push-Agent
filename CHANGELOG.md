@@ -9,6 +9,29 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.12] - 2026-09-12
+
+### Changed
+- **Thumbnail replaced.** Both copies of the thumbnail
+  (`/a0/usr/plugins/push_zero/thumbnail.png` and
+  `/a0/usr/plugins/push_zero/webui/thumbnail.png`) have been regenerated
+  from a user-supplied 1254×1254 RGB source image, resized to
+  **128×128 px** with LANCZOS downsampling, quantized to a 32-colour
+  adaptive palette, and written byte-identically to both locations.
+  Final size is in the low single-digit KB range, well within the
+  Hub's 20 KB ceiling. Pixel-sampled to confirm the rendered icon
+  matches the user-supplied source.
+
+### Notes
+- Asset-only release. No API contract changes, no settings UI
+  changes, no tool behaviour changes, no test changes.
+- The thumbnail is rendered in three surfaces by Agent Zero:
+  the Plugins card, the External Services entry, and (when
+  published) the Hub listing. All three consume
+  `webui/thumbnail.png` directly. The root copy
+  (`thumbnail.png`) is preserved for first-class project visibility.
+- Version 1.1.11's credential-corruption fix is unaffected.
+
 ## [1.1.11] - 2026-09-12
 
 ### Critical
