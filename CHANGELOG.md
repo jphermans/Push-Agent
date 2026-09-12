@@ -5,11 +5,24 @@ All notable changes to the Pushover plugin are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.22] - 2026-09-12
 
-_(no changes yet)_
+### Security
+- **Removed `push_zero_config.json` from git tracking and history.** The plugin-local JSON persistence file (which holds plaintext Pushover credentials) had been inadvertently committed in v1.1.19 (commit `98e2274`, tag `v1.1.19`) and v1.1.20 (commit `1e45b32`, tag `v1.1.20`) because `.gitignore` only listed the framework mirror (`config.json`). This release closes the leak in five steps:
+  1. The leaked Pushover application token was rotated on the Pushover dashboard (old token invalidated → returns `HTTP 410` from Pushover's API, so the leaked `(user_key, old_token)` pair is now inert even though user keys are not user-rotatable on Pushover's platform).
+  2. `push_zero_config.json` was added to `.gitignore`.
+  3. `git rm --cached push_zero_config.json` untracked the file while keeping the local copy on disk.
+  4. `git filter-repo --invert-paths --path push_zero_config.json` removed the file from every commit in history (not just `HEAD`).
+  5. `git push --force` rewrote `origin/main` and every tag to the rewritten SHAs.
+  Verified: `git log origin/main -p` returns zero matches for the leaked credential patterns. The public GitHub commit history no longer contains the leaked secrets.
 
-## [1.1.14] - 2026-09-12
+### Notes
+- The Pushover user/group key remains `CpS9…vhD9` in the live configuration. This is expected and acceptable: Pushover's API requires both `(token, user)` to authenticate, and the leaked token is now dead. The user key was never revoked because Pushover does not expose a self-serve user-key rotation. Future notifications continue to use the existing user key, paired with the rotated application token (not in git history).
+- All previously-released tag→SHA mappings are now obsolete. New SHAs after the history rewrite: `v1.1.22 = 1a277ed`, `v1.1.21 = c0e7d39`, `v1.1.20 = 2cdb9db`, `v1.1.19 = daa32b7`. Refer to the rewritten forms only.
+- See `SECURITY.md` for the full incident note, supported-versions policy, and reporting path.
+
+
+## [1.1.21] - 2026-09-12
 
 ### Changed
 - **Setup page credential inputs now show the masked display
