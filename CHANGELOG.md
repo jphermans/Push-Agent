@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+
+## [1.1.24] - 2026-09-12
+
+### Bug fix
+
+- **Setup page "Save Configuration" no longer reloads the entire A0 process.**
+  Root cause: `helpers/config_helper.py:save_config()` was calling `core_plugins.save_plugin_config(...)` to mirror settings into framework storage. The A0 framework's `save_plugin_config` (in `/a0/helpers/plugins.py` around line 188-194, 595) unconditionally calls `refresh_plugin_modules([plugin_name])` and, when both `project_name` and `agent_profile` are empty (which they were for our global plugin), also calls `send_frontend_reload_notification(...)`. Both side effects triggered a full Python-module reload on every save, racing with the local-JSON write so users observed "changes are not kept".
+  Fix: skip the framework `save_plugin_config` call. The local JSON file (`push_zero_config.json`) is the source of truth (see `get_raw_config`); framework storage only acts as a fallback that `get_raw_config` auto-repopulates on first read. The same fix is applied to `reset_config()`.
 ## [1.1.23] - 2026-09-12
 
 ### Documentation

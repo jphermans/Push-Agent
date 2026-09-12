@@ -206,36 +206,43 @@ def save_config(config: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(config, dict):
         raise ValueError("config must be a dict")
     payload = ensure_defaults(config)
-    # PRIMARY: write to the local JSON file first.
+    # PRIMARY: write to the local JSON file only.
+    #
+    # We deliberately do NOT call core_plugins.save_plugin_config() here.
+    # The framework's save_plugin_config unconditionally calls
+    # refresh_plugin_modules([plugin_name]) AND, when both project_name
+    # and agent_profile are empty, send_frontend_reload_notification()
+    # (see /a0/helpers/plugins.py around line 188-194, 595). Both of
+    # those side effects reload the Pushover plugin's Python modules
+    # and push a "page reload recommended" toast to the browser, which
+    # is what caused the v1.1.23 "save config makes A0 reload" bug:
+    # every save triggered a full module reload, the in-memory state
+    # was discarded, and although the local JSON file did get written,
+    # the reload-then-fresh-start raced with the write so the user
+    # observed "changes are not kept".
+    #
+    # The local JSON file is the source of truth for this plugin
+    # (see get_raw_config, which reads it first). Framework storage
+    # only acts as a fallback when the local file is missing/empty,
+    # and get_raw_config auto-repopulates it via _write_local_config.
+    # So skipping the framework mirror here is safe and is the
+    # correct fix.
     _write_local_config(payload)
-    # SECONDARY: mirror into framework storage so the framework plugin UI
-    # also reflects the saved values.
-    try:
-        core_plugins.save_plugin_config(
-            PLUGIN_NAME,
-            project_name="",
-            agent_profile="",
-            settings=payload,
-        )
-    except Exception as exc:
-        logger.warning("push_zero: framework save_plugin_config failed: %s", exc)
     return payload
 
 
 def reset_config() -> None:
     """Erase all plugin-scope Pushover settings."""
     # Remove the local JSON file so the next read starts from defaults.
+    # We deliberately do NOT call core_plugins.save_plugin_config() here
+    # either, for the same reason as in save_config() — it triggers
+    # refresh_plugin_modules which reloads the plugin's Python modules
+    # mid-request, which is the source of the v1.1.23 reload bug.
     try:
         if _LOCAL_CONFIG_PATH.exists():
             _LOCAL_CONFIG_PATH.unlink()
     except OSError as exc:
         logger.warning("push_zero: could not delete local config at %s: %s", _LOCAL_CONFIG_PATH, exc)
-    core_plugins.save_plugin_config(
-        PLUGIN_NAME,
-        project_name="",
-        agent_profile="",
-        settings={},
-    )
 
 
 __all__ = [

@@ -397,4 +397,4 @@ The Setup page reads from disk on open; writes go to both layers on Save; the pa
 
 ---
 
-<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.23.</sub>
+<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.24.</sub>
