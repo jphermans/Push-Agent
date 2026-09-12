@@ -735,3 +735,12 @@ _(no changes yet)_
 - File mode is normalised to 0644 on every write so the A0 runtime (running as a non-root user) can read it.
 - `reset_config()` now also deletes the local file so the next read starts from defaults.
 - All three paths (read, write, hydrate) verified end-to-end via direct Python invocation in the runtime harness.
+
+## [1.1.19] - 2026-09-12
+
+### Fixed
+- **Cache-bust `setup-store.js` import.** Added `?v=1.1.19` query string to both `webui/main.html` and `webui/config.html` so the browser fetches the latest module even when the prior file is cached.
+- **Console instrumentation for diagnosis.** `setup-store.js` now logs `[push_zero] store initialized`, `[push_zero] refresh() invoked`, and `[push_zero] save() called` to the browser console so the user can verify the click is reaching the handler.
+
+### Notes
+- No behavior change to persistence or storage. This release is purely diagnostic + cache-control so we can confirm whether the next click does or does not reach the save handler. If you still see no POST after this update, paste the new console output and we'll know exactly which layer is broken.

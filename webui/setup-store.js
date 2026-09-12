@@ -111,6 +111,7 @@ export const store = createStore("push_zeroSetup", {
   },
 
   async init() {
+    console.log("[push_zero] store initialized, fields:", this.fields);
     if (this.didInit) return;
     this.didInit = true;
     await this.refresh();
@@ -133,6 +134,7 @@ export const store = createStore("push_zeroSetup", {
   },
 
   async refresh() {
+    console.log("[push_zero] refresh() invoked, hydrating from API");
     this.loading = true;
     try {
       const data = await post("status");
@@ -223,6 +225,7 @@ export const store = createStore("push_zeroSetup", {
   },
 
   async save() {
+    console.log("[push_zero] save() called, fields:", JSON.stringify(this.fields));
     this.saving = true;
     try {
       const payload = { ...this.fields };
