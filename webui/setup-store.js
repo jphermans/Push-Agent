@@ -111,6 +111,7 @@ export const store = createStore("push_zeroSetup", {
   },
 
   async init() {
+    document.body.classList.add("push-zero-modal-active");
     console.log("[push_zero] store initialized, fields:", this.fields);
     if (this.didInit) return;
     this.didInit = true;
@@ -120,6 +121,7 @@ export const store = createStore("push_zeroSetup", {
   },
 
   cleanup() {
+    document.body.classList.remove("push-zero-modal-active");
     this.didInit = false;
     this.testResults = [];
     this.limits = null;

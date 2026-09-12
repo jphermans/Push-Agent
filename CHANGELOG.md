@@ -744,3 +744,8 @@ _(no changes yet)_
 
 ### Notes
 - No behavior change to persistence or storage. This release is purely diagnostic + cache-control so we can confirm whether the next click does or does not reach the save handler. If you still see no POST after this update, paste the new console output and we'll know exactly which layer is broken.
+
+## [1.1.20] - 2026-09-12
+
+### Fixed
+- **Hide host framework's plugin-settings modal footer when push_zero is active.** The host modal has its own "Reset to default / Save / Cancel" footer that calls a different code path than the plugin's own save handler. This caused a misleading UX where two "Save" buttons were visible and only the green plugin-internal "Save Configuration" button actually persisted settings. The host footer is now hidden via a scoped CSS rule (`body.push-zero-modal-active [data-modal-footer] { display: none }`) that is toggled by `setup-store.js:init()` / `cleanup()`.

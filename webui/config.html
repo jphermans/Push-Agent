@@ -23,6 +23,12 @@
      * the browser's `prefers-color-scheme`, not to the host's
      * in-page theme toggle.
      */
+
+    /* Hide the host framework's plugin-settings modal footer when our plugin page is active.
+       The host's footer (Reset to default / Save / Cancel) calls a different code path
+       than our own save handler, so the user must click the green "Save Configuration"
+       button inside the page. Hiding the host footer removes the misleading duplicate. */
+    body.push-zero-modal-active [data-modal-footer] { display: none !important; }
     .po-page {
       max-width: 960px;
       margin: 0 auto;
