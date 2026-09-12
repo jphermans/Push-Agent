@@ -259,6 +259,50 @@
     .po-empty-state h3 { margin-top: 0; }
     .po-empty-state .po-btn { margin-top: 12px; }
     .po-link { color: var(--color-highlight); text-decoration: underline; }
+      /* ----- Mobile breakpoint (<=700px) --------------------------------- */
+      @media (max-width: 700px) {
+        .po-page { padding: 16px 12px 80px 12px; }
+        .po-page h1 { font-size: 1.3rem; }
+        .po-page h2 { font-size: 0.95rem; margin: 20px 0 8px 0; }
+        .po-status-card {
+          flex-direction: column;
+          align-items: stretch;
+          gap: 12px;
+          padding: 14px;
+        }
+        .po-status-card > .po-status-detail { min-width: 0; flex-basis: auto; }
+        .po-status-card .po-actions {
+          width: 100% !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          flex-shrink: 1 !important;
+          gap: 8px;
+        }
+        .po-status-card .po-actions .po-btn {
+          width: 100%;
+          justify-content: center;
+        }
+        .po-grid { grid-template-columns: 1fr; }
+        .po-saved-badge { font-size: 0.8rem; padding: 3px 8px; }
+        .po-field > input,
+        .po-field > select {
+          font-size: 16px;            /* iOS: prevent zoom-on-focus */
+          width: 100%;
+          box-sizing: border-box;
+        }
+        .po-section { padding: 14px; }
+        .po-field-hint { font-size: 0.8rem; }
+        /* Footer-style action bars wrap or stack, but never overflow */
+        .po-actions[style*="space-between"] {
+          flex-direction: column !important;
+          align-items: stretch !important;
+          gap: 12px;
+        }
+        .po-actions[style*="space-between"] .po-btn {
+          width: 100%;
+          justify-content: center;
+        }
+      }
   </style>
 </head>
 <body>

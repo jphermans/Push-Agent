@@ -692,3 +692,20 @@ _(no changes yet)_
 - No API contract change for tools; behaviour is strictly more permissive.
 - No change to credit/quota usage.
 - No change to priority-default-on-omission behaviour (Pushover still applies the system default when the field is absent).
+
+## [1.1.16] - 2026-09-12
+
+### Fixed
+- **Mobile layout (iOS/Android browsers):** the Setup page rendered incorrectly below 700px viewport width. Buttons in the Connection Setup panel ("Test Connection"/"Send Test Notification") overflowed horizontally, the action row refused to shrink (inline `flex-shrink:0`), and long labels wrapped over neighbouring panels. Added a `@media (max-width: 700px)` block to both `webui/main.html` and `webui/config.html` that:
+  - Stacks connection-card buttons vertically with full width and centered labels.
+  - Forces the connection `po-status-card` to a vertical layout so the action row sits below the status detail.
+  - Constrains `.po-grid` to a single column on narrow screens.
+  - Sets `font-size: 16px` on form fields (iOS no-zoom-on-focus rule).
+  - Reduces padding/margins of `.po-page`, `.po-section`, `.po-saved-badge`, and `.po-field-hint` for mobile.
+  - Wraps footer action bars ("Save Configuration"/"Reset Pushover Configuration") to a vertical stack.
+- **Duplicate "Currently set" rendering on the legacy config page:** `webui/config.html` was rendering the masked credential value twice — once in the masked input (1.1.14 partial-reveal) and once again as a plain `<div class="po-muted">Stored locally...Currently set: ****X</div>` block right below it. Removed the redundant plain-text blocks; the 1.1.14 badge ("Saved as ****X · type a new value to replace") is now the single source of truth.
+
+### Notes
+- No API or tool contract changes. Pure CSS / markup cleanup.
+- Does not affect dark/light theme switching — uses the same neutral pointer variables as before.
+- The host's "Plugin Settings" footer (Reset to default / Save / Cancel) is rendered by the Agent Zero host framework, not by this plugin, and is therefore outside the scope of this fix.
