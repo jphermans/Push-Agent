@@ -709,3 +709,14 @@ _(no changes yet)_
 - No API or tool contract changes. Pure CSS / markup cleanup.
 - Does not affect dark/light theme switching — uses the same neutral pointer variables as before.
 - The host's "Plugin Settings" footer (Reset to default / Save / Cancel) is rendered by the Agent Zero host framework, not by this plugin, and is therefore outside the scope of this fix.
+
+
+## [1.1.17] - 2026-09-12
+
+### Critical
+- **Notification Defaults vanished on save+reopen.** `helpers/config_helper.py:status_snapshot()` returned only a flat subset of fields (`configured`, `token_set`, `user_set`, `masked_token`, `masked_user`, `has_defaults`, `emergency_retry`, `emergency_expire`, `timeout`, `debug`). It did NOT include the saved values of Notification Defaults / Emergency / Advanced / Tags / Device / Callback. The Setup page's `refresh()` falls back to hardcoded JS defaults when those fields are missing, so every non-credential setting appeared to "reset" to its default after a save+reopen cycle. The snapshot now embeds the full masked config under `config` — the same shape `setup-store.js:refresh()` already expects — so all 16 saved fields hydrate from disk on page open.
+
+### Notes
+- `get_masked_config()` is used inside `status_snapshot()` so the API response never leaks the plaintext token / user (replaced with the same masked display shown on the Setup page).
+- No API contract changes for tools / tests; this is a purely Setup-page UX bug fix.
+- `api/save.py` was already persisting the defaults correctly (verified); the bug was purely on the read path.

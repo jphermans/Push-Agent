@@ -59,8 +59,19 @@ def is_configured(agent: Any | None = None) -> bool:
 
 
 def status_snapshot(agent: Any | None = None) -> dict[str, Any]:
-    """Return a setup-status snapshot for the Setup page."""
-    cfg = get_raw_config(agent=agent)
+    """Return a setup-status snapshot for the Setup page.
+
+    The Setup page reads ``data.config`` to populate ALL Notification
+    Defaults / Emergency / Advanced / Tags / Device / Callback fields.
+    The snapshot MUST include the full masked config so the page mirrors
+    exactly what is on disk; otherwise non-credential fields revert to
+    JS-side hardcoded defaults when the page is re-opened after a save.
+
+    ``get_masked_config`` returns a deep-copy of the saved config with the
+    ``token`` / ``user`` values replaced by masked displays, so the API
+    response stays credential-safe.
+    """
+    cfg = get_masked_config(agent=agent)
     token, user = get_credentials(agent=agent)
     return {
         "configured": bool(token) and bool(user),
@@ -68,11 +79,12 @@ def status_snapshot(agent: Any | None = None) -> dict[str, Any]:
         "user_set": bool(user),
         "masked_token": mask_identifier(token),
         "masked_user": mask_identifier(user),
-        "has_defaults": bool(cfg.get("defaults")),
-        "emergency_retry": (cfg.get("emergency", {}) or {}).get("retry"),
-        "emergency_expire": (cfg.get("emergency", {}) or {}).get("expire"),
-        "timeout": (cfg.get("advanced", {}) or {}).get("timeout"),
-        "debug": bool((cfg.get("advanced", {}) or {}).get("debug", False)),
+        # Full masked config - drives the JS-side hydration of every
+        # Notification Defaults / Emergency / Advanced / Tags / Device /
+        # Callback field on page open. Without this the JS falls back to
+        # its hardcoded defaults and any non-credential edits appear
+        # "lost" after a save+reopen cycle.
+        "config": cfg,
     }
 
 
