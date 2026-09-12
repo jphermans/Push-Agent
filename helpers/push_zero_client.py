@@ -450,7 +450,7 @@ class PushoverClient:
 
     def get_app_limits(self) -> PushoverResult:
         """GET to ``/1/apps/limits.json``. Requires the app's secret (we use token)."""
-        return self._post("/1/apps/limits.json", {"token": self.token})
+        return self._post(PUSHOVER_LIMITS_PATH, {"token": self.token})
 
     def get_receipt(self, receipt: str) -> PushoverResult:
         receipt = (receipt or "").strip()

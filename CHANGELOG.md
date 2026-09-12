@@ -9,6 +9,91 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.5] - 2026-09-12
+
+### Fixed
+- **API Usage panel no longer renders "0 / null" when the
+  application has no monthly cap.** The Setup page's Usage
+  section previously fetched `POST /api/plugins/push_zero/limits`
+  and rendered the result unconditionally as
+  `Messages used: <used> / <limit>`. Pushover's
+  `/1/apps/limits.json` endpoint returns
+  `{"status": 1, "limit": null, "used": null, ...}` for
+  applications without a monthly message cap (very common for
+  paid or unlimited apps), which the JS store was previously
+  projecting as `{limit: null, used: 0}` and the HTML rendered
+  as the literal string `Messages used: 0 / null`.
+
+  1.1.5 fixes that by:
+  - adding a new `limitsMessage` field to the JS store,
+  - branching in `refreshLimits()` between *success with cap*
+    (numeric quota), *success without cap* (friendly note), and
+    *failure* (error message),
+  - adding a third `<template x-if>` in `webui/main.html` for
+    the no-cap case so the user sees an explanation instead of
+    bogus numbers.
+
+### Changed
+- `helpers/push_zero_client.py` `get_app_limits()` now uses the
+  `PUSHOVER_LIMITS_PATH` constant instead of the previously
+  hard-coded `\"/1/apps/limits.json\"` literal, so any future
+  base-URL or path change happens in exactly one place.
+
+### Notes
+- Setup-page-only fix. No runtime, configuration, route, or
+  theme behaviour changed. The Pushover client contract is
+  unchanged. The 49-test suite carries forward; only the
+  client constant was rewired and the JS + HTML rendering path
+  was widened.
+
+## [1.1.4] - 2026-09-12
+
+### Changed
+- **README.md rewritten with colors, icons, and the embedded
+  thumbnail.** The top of the file now shows the A0-branded
+  thumbnail (128 × 128, 1,344 B) centred above the title, followed by
+  a row of `shields.io` badges (repository, version, license,
+  Agent Zero compatibility, Python, tests). Section headings, table
+  cells, callouts and lists now use color-coded HTML
+  (`<span style="color:#E74C3C">push</span><span style="color:#2A5C8F">_zero</span>`,
+  green `#28a745` for success, red `#dc3545` for failure, orange
+  `#f39c12` for warnings) so the document reads like a polished
+  product page rather than a flat changelog bullet list. Emoji
+  icons (`🔔 ⚙️ ✅ 📨 🚨 📜 ✖️ 🎵 📱 🔗 ⏳ 📊 🔐 🎨 🧪 🏷️ 🛡️ 🧱 📋
+  🚀 🛠️ 🤖 🚨 🔐 🧪 🆘 🗑️ 📜 🔗`) anchor every section header and
+  table row for at-a-glance scanning. A Mermaid `flowchart LR`
+  diagram now visualises the runtime split between the WebUI/API/
+  Tool surface and the helper/client/validator internals, including
+  the HTTPS POST into `api.pushover.net/1/messages.json`.
+
+### Added
+- New sections in README that weren't there before:
+  - 🎯 **Features at a glance** — 17-row icon+capability+notes table.
+  - 🧱 **Architecture (Mermaid)** — the architecture diagram
+    described above.
+  - 📋 **Requirements** — Agent Zero version, Python version,
+    Pushover account prerequisites, and a confirmation that the
+    plugin ships **zero** additional Python dependencies.
+  - 🤖 **Agent tool — `push_zero_notify`** — full parameter table
+    and minimal + emergency examples with their return shapes.
+  - 🚨 **Emergency notifications** — priority + retry + expire
+    contract and receipt flow.
+  - 🛠️ **Setup page** — section-by-section breakdown matching the
+    `webui/main.html` layout.
+  - 🆘 **Troubleshooting** — 9-row symptom / cause / fix matrix
+    mirroring the agent's own diagnostic paths.
+  - 🗑️ **Uninstall** — single-shell recipe plus the
+    `hooks.py` cleanup guarantee.
+  - 🔗 **Links** — repo, future Index entry, Pushover docs,
+    Agent Zero core.
+
+### Notes
+- Documentation-only change. No runtime, configuration, theme,
+  route, import, or API behaviour changed. The 49-test suite
+  carries forward unchanged; the only file content delta is
+  README.md, plus the version bump in `plugin.yaml` and this
+  CHANGELOG entry.
+
 ## [1.1.3] - 2026-09-12
 
 ### Changed

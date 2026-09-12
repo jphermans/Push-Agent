@@ -459,6 +459,9 @@
             <template x-if="$store.push_zeroSetup.loadingLimits">
               <div class="po-muted">Loading...</div>
             </template>
+            <template x-if="!$store.push_zeroSetup.loadingLimits && $store.push_zeroSetup.limitsMessage">
+              <div class="po-muted" x-text="$store.push_zeroSetup.limitsMessage"></div>
+            </template>
             <template x-if="!$store.push_zeroSetup.loadingLimits && $store.push_zeroSetup.limits">
               <div>
                 <div>Messages used:

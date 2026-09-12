@@ -40,3 +40,4 @@ build/
 *.egg-info/
 *.tar.gz
 *.whl
+config.json

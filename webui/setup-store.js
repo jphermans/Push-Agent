@@ -81,6 +81,7 @@ export const store = createStore("push_zeroSetup", {
   testResults: [],
   limits: null,
   limitsError: "",
+  limitsMessage: "",
   sounds: DEFAULT_SOUNDS.slice(),
   soundFetched: false,
   priorityOptions: PRIORITY_OPTIONS,
@@ -249,15 +250,31 @@ export const store = createStore("push_zeroSetup", {
   async refreshLimits() {
     this.loadingLimits = true;
     this.limitsError = "";
+    this.limitsMessage = "";
     try {
       const data = await post("limits", {});
       if (data && data.success) {
-        this.limits = {
-          limit: data.limit || null,
-          used: data.used || 0,
-          remaining: data.remaining || null,
-          reset: data.reset || null,
-        };
+        // Pushover returns `limit: null` when the application has no monthly
+        // message cap (very common for paid or unlimited apps). Distinguish
+        // that case explicitly so the UI doesn't render "Messages used: 0 /
+        // null".
+        const hasCap = data.limit !== null && data.limit !== undefined;
+        if (hasCap) {
+          this.limits = {
+            limit: data.limit,
+            used: data.used || 0,
+            remaining: data.remaining || null,
+            reset: data.reset || null,
+          };
+          this.limitsMessage = "";
+        } else {
+          // Success but no numeric cap reported - surface a friendly note
+          // instead of bogus numbers.
+          this.limits = null;
+          this.limitsMessage =
+            (data && data.message) ||
+            "No monthly message cap is configured for this Pushover application.";
+        }
       } else {
         this.limits = null;
         this.limitsError = (data && data.error) || "Pushover did not return usage information.";

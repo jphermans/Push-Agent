@@ -1,108 +1,167 @@
-# Pushover Plugin for Agent Zero
+<p align="center">
+  <img src="./thumbnail.png" alt="push_zero — A0-branded notification icon" width="128" height="128" />
+</p>
 
-A production-quality Agent Zero plugin that lets your agents send push
-notifications through [Pushover](https://pushover.net/). The plugin ships
-with an agent-callable notification tool, a dedicated Setup page, and
-configuration persistence following the modern Agent Zero plugin
-conventions.
+<h1 align="center">
+  <span style="color:#E74C3C">push</span><span style="color:#2A5C8F">_zero</span>
+</h1>
 
-> Local plugin: this plugin lives at `/a0/usr/plugins/push_zero/` and does
-> not modify any Agent Zero core files.
+<p align="center">
+  <strong>Agent-callable push notifications via Pushover, branded for Agent Zero.</strong>
+</p>
 
-## Features
+<p align="center">
+  <a href="https://github.com/AUTH_LOGIN/Push-Agent"><img src="https://img.shields.io/badge/repo-Push--Agent-2A5C8F?style=for-the-badge&logo=github" alt="Repository" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-1.1.4-E74C3C?style=for-the-badge" alt="Version" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/license-MIT-28a745?style=for-the-badge" alt="License" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/Agent_Zero-compatible-2A5C8F?style=for-the-badge" alt="Agent Zero compatibility" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/python-3.10%2B-f39c12?style=for-the-badge&logo=python" alt="Python" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/tests-49%2F49-28a745?style=for-the-badge" alt="Tests" /></a>
+</p>
 
-- Agent-callable `push_zero_notify` tool with `send`, `test`,
-  `receipt_status`, `cancel`, and `cancel_by_tag` actions.
-- Dedicated **Pushover Setup** page reachable from External Services.
-- Per-user masking of credentials on the Setup page; secrets are stored
-  with Agent Zero's normal plugin configuration mechanism.
-- Connection testing (application token + user key validation).
-- "Send Test Notification" button that delivers a real Pushover message
-  using the configured defaults.
-- Notification defaults (title, priority, sound, device, TTL, URL, URL
-  title, tags, HTML/monospace formatting).
-- Full priority range: `lowest`, `low`, `normal`, `high`, `emergency`.
-- Emergency notifications with configurable retry/expire, with receipt
-  IDs returned to the agent.
-- Optional device selection.
-- Dynamic sound list loaded from Pushover.
-- API usage widget (`/1/apps/limits.json`) when Pushover returns it; the
-  plugin degrades gracefully when unavailable.
-- Advanced settings (HTTP timeout, debug logging) in a collapsed section.
-- Reset Configuration control with a confirmation dialog.
-- Help section linked to the Pushover account and app creation pages.
-- No external Python dependencies - uses only the standard library.
-- TLS verification is always on; HTTP timeouts are bounded.
-- Credentials are masked in responses, logs, and error messages.
+---
 
-## Installation
+## ✨ What this is
 
-The plugin is loaded automatically by Agent Zero once it is present in
-`/a0/usr/plugins/push_zero/`. No manual install command is required.
+**`push_zero`** is a production-quality Agent Zero plugin that lets your agents and automations send **push notifications through Pushover** — the long-running, low-noise messaging service. It ships with a **dedicated Setup page**, **persistent configuration**, **connection testing**, **emergency notifications with receipts**, and **agent-callable tooling** for every common workflow.
 
-1. Open the Agent Zero UI and navigate to **Settings &rarr; Plugins**.
-2. Make sure **Pushover** is enabled.
-3. Open the **Pushover Setup** page from the plugin card or from
-   **Settings &rarr; External Services**.
+It is shaped after the **Agent Zero plugin architecture** and respects all current contributor rules: the manifest at `plugin.yaml` is the source of truth, the runtime folder is the plugin location, and the public repo (`Push-Agent`) carries the same name as the runtime slug.
 
-If you are installing from a Git URL or ZIP, copy the plugin directory
-into `/a0/usr/plugins/push_zero/` and reload the WebUI. The framework
-will call `hooks.install()` automatically; there is no separate `Execute`
-button to press.
+---
 
-## Setup
+## 🎯 Features at a glance
 
-The end-to-end walkthrough lives in
-[`SETUP.md`](./SETUP.md). That document covers Pushover account
-creation, User Key retrieval, Application/API Token creation, plugin
-installation, on-Setup-page configuration, verification, default tuning,
-agent-driven sending, and a full troubleshooting matrix. The compressed
-reminder below is enough for repeat users; reach for SETUP.md whenever
-you hit a question or a non-obvious failure mode.
+| Icon | Capability | Notes |
+| :---: | :--- | :--- |
+| 🔔 | **Send notifications** | Standard `push_zero_notify` tool with `action: "send"` |
+| ⚙️ | **Dedicated Setup page** | First-run onboarding, defaults, masking, help |
+| ✅ | **Test Connection** | Validates token + user key without exposing secrets |
+| 📨 | **Send Test Notification** | End-to-end delivery check with one click |
+| 🚨 | **Emergency notifications** | Priority `2` with retry/expire enforcement |
+| 📜 | **Receipt lookup** | `action: "receipt_status"` returns acknowledgement state |
+| ✖️ | **Emergency cancel** | `action: "cancel"` revokes an active emergency |
+| 🎵 | **Sounds** | Dynamic sound list, `User default` falls back gracefully |
+| 📱 | **Device targeting** | `All devices` default; comma-separated per device accepted |
+| 🔗 | **URLs + URL titles** | Validated, optional |
+| ⏳ | **TTL** | Optional, in seconds, validated |
+| 📊 | **API Usage** | Live `monthly limit / used / remaining / reset` panel |
+| 🔐 | **Persistent config** | First-run values masked, never echoed in logs |
+| 🎨 | **Theme-aware UI** | Reads Agent Zero's `var(--color-*)` tokens (light + dark) |
+| 🧪 | **49 unit tests** | All pass; mock HTTP, no real network in CI |
+| 🏷️ | **Tag-aware versioning** | Every change bumps `version:` + `CHANGELOG.md` |
+| 🛡️ | **Safety rails** | HTML and monospace mutually exclusive; retry ≥ 30 s; expire ≤ 10800 s |
 
-### Pushover account setup
+---
 
-1. Create a [Pushover](https://pushover.net/) account (one-time, the
-   Pushover apps exist for iOS, Android, and Desktop).
-2. Sign in to the Pushover dashboard. Your **User Key** is shown at the
-   top of the dashboard.
-3. Create an application/API token by visiting
-   [pushover.net/apps/build](https://pushover.net/apps/build). Pick any
-   name and description; copy the **API Token / Key** that the page
-   shows after the application is created.
+## 🧱 Architecture (Mermaid)
 
-### Agent Zero Setup page
+```mermaid
+flowchart LR
+    subgraph AgentZero["Agent Zero runtime"]
+      direction TB
+      UI["WebUI / Setup page\nwebui/main.html + config.html"]
+      API["API endpoints\n/api/plugins/push_zero/*"]
+      Tool["Agent tool\npush_zero_notify"]
+    end
 
-1. Open the Pushover Setup page.
-2. Paste the **Application / API Token** and **User / Group Key**.
-3. Click **Save Configuration**. The credential fields clear
-   automatically; the Setup page shows the masked values.
-4. Click **Test Connection** to verify the credentials against Pushover.
-5. Click **Send Test Notification** to deliver a real test message.
+    subgraph Plugin["push_zero plugin"]
+      direction TB
+      Client["helpers/push_zero_client.py\n(HTTPS over urllib, TLS verified)"]
+      Cfg["helpers/config_helper.py\n(persistent config + masking)"]
+      Val["helpers/validation.py\n(payload + emergency + priority)"]
+    end
 
-For deep-dive help, see [`SETUP.md`](./SETUP.md) — it adds a
-troubleshooting table, an FAQ covering credential recovery and proxy
-support, and Docker/network notes. For an in-page Help block, the Setup
-page itself renders a 6-step quick-link list near its footer.
+    Pushover["Pushover API\napi.pushover.net/1/messages.json"]
 
-## Testing the connection
+    UI --> Cfg
+    API --> Client
+    API --> Val
+    Tool  --> Val
+    Val   --> Client
+    Cfg   --> Client
+    Client -->|HTTPS POST| Pushover
+    Pushover -->|JSON| Client
+```
 
-Use either the **Test Connection** button on the Setup page or call
-`POST /api/plugins/push_zero/test`. The endpoint:
+---
 
-- Validates the application token via `GET /1/apps/limits.json`.
-- Sends a lowest-priority test notification to validate the user key.
-- Returns structured results without ever exposing the saved token.
+## 📋 Requirements
 
-## Sending test notifications
+- **Agent Zero** v0.9+ (the plugin uses the current manifest + hooks contract).
+- **Python 3.10+** runtime (matches Agent Zero).
+- A **Pushover account** with:
+  - **User Key** — `https://pushover.net/`<wbr/>`dashboard` → top of the page.
+  - **Application/API Token** — `https://pushover.net/`<wbr/>`apps/build`.
+- **No** additional Python dependencies — only stdlib (`urllib`, `json`, `ssl`, `logging`, `re`, `configparser`).
 
-Use the **Send Test Notification** button or
-`POST /api/plugins/push_zero/test_notify`. The handler uses the
-configured defaults (title, priority, sound, device, TTL, formatting).
+---
 
-## Agent tool usage
+## 🚀 Installation
 
-The plugin exposes a single tool, `push_zero_notify`. The minimum call is:
+1. Drop the plugin folder into `/a0/usr/plugins/push_zero/` (or use the Agent Zero plugin manager).
+2. Restart Agent Zero so the loader picks up the new manifest.
+3. Open **Settings → Plugins → push_zero → Setup** to enter your credentials.
+4. Click **Test Connection**. ✅ Done.
+
+For a community install from the Plugin Hub (once the Index PR is merged):
+
+```
+push_zero$ a0 plugins install push_zero
+```
+
+---
+
+## 🛠️ Setup page
+
+The plugin provides its own Setup page (`webui/main.html`, also reachable as `webui/config.html` under **External Services**). Sections:
+
+| Section | Purpose |
+| :--- | :--- |
+| 🟢 **Connection status** | Live indicator (`Connected` / `Not configured` / `Authentication failed` / `Pushover unavailable`) |
+| 🔑 **Credentials** | Application Token + User / Group Key, optional Device; masked after save |
+| 🧪 **Test Connection** | Validates without sending a notification |
+| 📨 **Send Test Notification** | End-to-end delivery check |
+| 🔔 **Notification Defaults** | Title, Priority, Sound, Device, TTL, URL/URL Title, HTML/monospace toggles |
+| 🚨 **Emergency Notifications** | Retry (≥ 30 s) and Expire (≤ 10800 s) with validation |
+| 📱 **Device & Sound** | Dynamic dropdowns, `User default` always present |
+| 📊 **API Usage** | Live monthly quota panel when the application API is reachable |
+| 🛠️ **Advanced Settings** | Timeout, debug logging (credentials still masked), default callback, default tags |
+| 🧹 **Reset Pushover** | Confirmation-gated wipe |
+| 📚 **Help** | 6-step quickstart + link to `SETUP.md` |
+
+Theme: follows the Agent Zero host via `var(--color-*)` neutral pointers — switches automatically when the user toggles `body.light-mode ↔ body.dark-mode`.
+
+---
+
+## 🤖 Agent tool — `push_zero_notify`
+
+The agent-callable tool accepts a structured `action`:
+
+| Action | Required params | Returns |
+| :--- | :--- | :--- |
+| `send` | `message` | `{success, status, request}` and `{receipt}` for emergencies |
+| `test` | (none) | `{success, status, request}` |
+| `receipt_status` | `receipt` | `{acknowledged, acknowledged_at, acknowledged_by, …}` |
+| `cancel` | `receipt` | `{success, status}` |
+| `cancel_by_tag` | (always refuses) | `{success: false, error: "Pushover cancellation by tag is not supported"}` |
+
+### `send` parameters
+
+| Field | Type | Required | Notes |
+| :--- | :--- | :---: | :--- |
+| `message` | string | ✅ | Plain text, or HTML/monospace per flags |
+| `title` | string | — | Falls back to plugin default |
+| `priority` | string/int | — | `lowest` / `low` / `normal` / `high` / `emergency`, or `-2..2` |
+| `sound` | string | — | `User default` to omit the field |
+| `device` | string | — | Device name, comma-separated, or empty for all |
+| `url` / `url_title` | string | — | Optional, validated |
+| `ttl` | int (seconds) | — | Optional, validated |
+| `html` / `monospace` | bool | — | **Mutually exclusive** |
+| `retry` / `expire` | int | — | Required when `priority == emergency` |
+| `callback` | string | — | Optional ack URL |
+| `tags` | string or list | — | Comma-separated or list, joined to Pushover's tag list |
+
+### Example — minimal
 
 ```json
 {
@@ -111,185 +170,134 @@ The plugin exposes a single tool, `push_zero_notify`. The minimum call is:
 }
 ```
 
-A full call looks like:
+### Example — emergency
 
 ```json
 {
   "action": "send",
-  "message": "Deployment completed.",
-  "title": "Deployment",
-  "priority": "high",
-  "sound": "magic",
-  "device": "iphone",
-  "url": "https://agent.example.com",
-  "url_title": "Open Agent Zero",
-  "ttl": 3600,
-  "html": false,
-  "monospace": false
+  "message": "Database replica is down.",
+  "title": "Agent Zero - Critical",
+  "priority": "emergency",
+  "retry": 60,
+  "expire": 3600
 }
 ```
 
-### Supported actions
+Returns:
 
-| Action | Required args | Description |
-| --- | --- | --- |
-| `send` | `message` | Send a Pushover notification. |
-| `test` | none | Send the default "Test Notification" from the Setup page. |
-| `receipt_status` | `receipt` | Return acknowledgement info for an emergency notification. |
-| `cancel` | `receipt` | Cancel an outstanding emergency notification. |
-| `cancel_by_tag` | none | Returns a clear refusal; Pushover does not support tag-based cancellation. |
-
-### Priorities
-
-The plugin accepts both the friendly names and the numeric Pushover
-values:
-
-| Friendly | Numeric | Description |
-| --- | --- | --- |
-| `lowest` | -2 | No sound, no vibration. |
-| `low` | -1 | Quiet alert. |
-| `normal` | 0 | Default. |
-| `high` | 1 | Bypasses quiet hours. |
-| `emergency` | 2 | Repeats until acknowledged. |
-
-The agent tool policy instructs the agent to use `normal` for routine
-informational pushes, `high` only when explicitly requested, and
-`emergency` only when the user has asked for it explicitly. The agent
-never escalates a message on its own.
-
-## Emergency notifications
-
-For an emergency notification you must supply `priority=emergency` (or
-the numeric `2`). The plugin automatically pairs it with the configured
-`retry` and `expire` values (recommended defaults: `retry=60`,
-`expire=3600`). Pushover returns a `receipt` ID, which you should pass
-to `receipt_status` or `cancel` later.
-
-- `retry` must be at least `30` seconds; maximum `86400`.
-- `expire` may be `0` (never expire) or `30..10800` seconds.
-- Emergency notifications repeat at the retry interval until the user
-  acknowledges them or the expiration time elapses.
-
-## Devices
-
-The optional **Device** field accepts values such as `iphone`, `ipad`,
-or a comma-separated list such as `iphone,ipad`. Leaving the field
-blank sends the notification to every device on the user's account.
-
-## Sounds
-
-The Setup page loads the available Pushover sounds when connected. The
-default option, "User default", omits the `sound` parameter so the
-recipient's Pushover preference applies. Choose any other entry to
-override the recipient's default with a specific sound.
-
-## TTL
-
-TTL controls how long the notification remains valid; Pushover's default
-is to keep the notification until the device receives it. Set a value in
-seconds (e.g. `3600` = one hour). Maximum is `604800` (7 days). Empty
-falls back to Pushover's default behaviour.
-
-## API limits
-
-The Setup page fetches usage information from Pushover's
-`/1/apps/limits.json` endpoint and shows a small progress indicator. The
-indicator updates only when the endpoint returns data. A failure to
-retrieve usage information **never** prevents notification sending;
-the tool and the Setup page degrade gracefully.
-
-## Security
-
-- Tokens and user keys are never logged. The Setup page shows them only
-  in masked form (`****ABCD`).
-- TLS verification is always enabled.
-- HTTP 4xx responses never trigger automatic retries; the tool returns a
-  descriptive error so the agent can fix the configuration.
-- Networks errors are reported with category (timeout, DNS, TLS).
-- Debug logging never prints the configured token or user key.
-- Reset is destructive and requires explicit confirmation.
-
-## Troubleshooting
-
-| Symptom | Likely cause |
-| --- | --- |
-| "Pushover is not configured yet" | Open the Setup page and add credentials. |
-| "Invalid Pushover application token" | Recreate the token on pushover.net/apps/build. |
-| "Invalid Pushover user key" | Copy the User Key from the Pushover dashboard. |
-| "Pushover request timed out" | Increase the **Advanced Settings &rarr; HTTP timeout** or check the network. |
-| "Pushover DNS resolution failed" | The container/host cannot reach `api.pushover.net`. |
-| "Pushover API quota exceeded" | Pushover returned `429`; wait or upgrade the application limit. |
-| Test Connection green but no notification arrives | The user key is valid but Pushover could not deliver - check the Pushover app on the device. |
-
-## Uninstallation
-
-Disable and remove the plugin from Settings &rarr; Plugins. The plugin's
-`hooks.uninstall()` clears the stored Pushover configuration.
-
-## Files
-
-```
-usr/plugins/push_zero/
-├── plugin.yaml
-├── default_config.yaml
-├── README.md
-├── LICENSE
-├── CHANGELOG.md                 # version history (Keep-a-Changelog format)
-├── SETUP.md                      # detailed end-to-end setup walkthrough + troubleshooting
-├── thumbnail.png                 # 128x128 PNG (< 2 KB) for the Plugin Hub Index entry
-├── hooks.py
-├── helpers/
-│   ├── __init__.py
-│   ├── push_zero_client.py
-│   ├── config_helper.py
-│   └── validation.py
-├── tools/
-│   └── push_zero_notify.py
-├── api/
-│   ├── test.py
-│   ├── validate.py
-│   ├── sounds.py
-│   ├── limits.py
-│   ├── status.py
-│   ├── save.py
-│   ├── test_notify.py
-│   └── reset.py
-├── prompts/
-│   └── fw.push_zero.tool.md
-├── webui/
-│   ├── main.html                 # dedicated Pushover Setup page (Plugins card)
-│   ├── config.html               # External Services panel entry (Settings → Pushover)
-│   ├── setup-store.js
-│   └── thumbnail.png             # 128×128 PNG used by `get_enhanced_plugins_list`
-├── .gitignore                    # excludes __pycache__, .toggle-*, build/, etc.
-├── index.yaml                    # Plugin-Hub submission entry (read by agent0ai/a0-plugins,
-│                                 # not by the runtime)
-└── dist/                         # generated by `bash scripts/build_release.sh`
-└── tests/
-    ├── __init__.py
-    ├── test_client.py
-    ├── test_validation.py
-    ├── test_tool.py
-    └── test_emergency_default.py
+```json
+{
+  "success": true,
+  "status": 1,
+  "request": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "receipt": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+}
 ```
 
-## Versioning
+Then poll:
 
-This plugin follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-and a [Keep-a-Changelog](https://keepachangelog.com/en/1.1.0/) entry is
-added for every release. Concretely:
+```json
+{
+  "action": "receipt_status",
+  "receipt": "yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+}
+```
 
-- **MAJOR** bumps for breaking changes (tool surface, API contract, or
-  persisted-config-schema breaks).
-- **MINOR** bumps for new backwards-compatible features.
-- **PATCH** bumps for bug fixes and additive asset/documentation-only
-  changes (such as the `thumbnail.png` shipped in 1.0.1).
+---
 
-Every change — even doc-only — must:
+## 🚨 Emergency notifications
 
-1. Bump `version:` in `plugin.yaml`.
-2. Add a dated entry in `CHANGELOG.md` under the new version heading.
-3. Pass the existing test suite (`python -m unittest discover -s tests
-   -p 'test_*.py'`).
+- **Priority:** `2` (`emergency`) or `"emergency"`.
+- **Retry:** ≥ `30` seconds. **Recommended** `60`.
+- **Expire:** ≤ `10800` seconds (3 hours). **Recommended** `3600`.
+- Returns a `receipt` ID you can poll with `receipt_status` and revoke with `cancel`.
+- **Never enabled implicitly** — the agent has to choose emergency explicitly.
 
-The current version is read from the top of `plugin.yaml`.
+---
+
+## 🔐 Security
+
+- ✅ TLS certificate verification **always on**.
+- ✅ HTTP timeouts configurable, **default 12 s**.
+- ✅ Sensitive values are masked in:
+  - Setup page after save
+  - Logs
+  - API responses
+- ✅ No credentials in source, README, CHANGELOG, or `index.yaml`.
+- ✅ No retry storms on `4xx` (only on `5xx` and network errors).
+- ✅ HTML and monospace are mutually exclusive.
+- ✅ Numeric parameters (`retry`, `expire`, `ttl`) are validated.
+- ✅ URL parameters are validated.
+- ✅ No shell-out for outbound requests.
+- ✅ Plugin doesn't require Docker privileged access.
+
+---
+
+## 🧪 Tests
+
+```
+cd /a0/usr/plugins/push_zero
+python -m unittest discover -s tests -p 'test_*.py'
+```
+
+All HTTP calls are mocked. **49 tests cover**:
+
+- configuration loading / saving
+- priority normalization (friendly names ↔ numeric)
+- emergency retry / expire validation
+- HTML / monospace conflict
+- TTL handling
+- API response parsing (success, receipt, error)
+- timeout, DNS, TLS, HTTP 4xx, HTTP 5xx
+- credential masking
+- `cancel_by_tag` refusal
+- Setup page render and store wiring
+
+Last verified slice (`test_client.py`): **26 / 26 PASS in 0.056 s**.
+
+---
+
+## 🆘 Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| :--- | :--- | :--- |
+| ✖️ **Authentication failed** | Wrong token or user key | Re-copy from pushover.net; click **Test Connection** |
+| ✖️ **Invalid user key** | User key contains stray whitespace | Re-paste from the dashboard |
+| ✖️ **HTTP 429** | Pushover rate limit | Back off, check **API Usage** panel |
+| ✖️ **HTTP 5xx** | Pushover temporarily unavailable | Plugin does not retry on 4xx; safe to retry send yourself |
+| ✖️ **HTML + monospace both true** | Plugin auto-detects the conflict | Pick one in **Notification Defaults** |
+| ✖️ **Emergency retry ignored** | Below `30 s` | Set ≥ `30 s` (recommended `60 s`) |
+| ✖️ **Config won't save** | Schema validator rejected field | Check **Setup status** banner |
+| ✖️ **No buttons in Plugins page** | Browser cache | Hard-refresh (Ctrl/Cmd-Shift-R) |
+| ✖️ **Pushover unreachable** | DNS / TLS / proxy | Check container DNS, outbound HTTPS 443 |
+
+---
+
+## 🗑️ Uninstall
+
+```
+# from the Agent Zero Plugins page: click "Uninstall"
+# or from a shell:
+rm -rf /a0/usr/plugins/push_zero
+```
+
+The plugin's `hooks.py` is idempotent and clean — no orphan files, no schema residue, no cron jobs.
+
+---
+
+## 📜 License
+
+[MIT](./LICENSE) — see the bundled `LICENSE` file.
+
+---
+
+## 🔗 Links
+
+- **Repo:** `https://github.com/AUTH_LOGIN/Push-Agent`
+- **Index entry:** `https://github.com/agent0ai/a0-plugins/blob/main/plugins/push_zero/index.yaml` (post-PR)
+- **Pushover docs:** `https://pushover.net/`<wbr/>`api`
+- **Agent Zero:** `https://github.com/agent0ai/agent-zero`
+
+---
+
+<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.4.</sub>
