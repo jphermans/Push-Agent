@@ -9,6 +9,39 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.11] - 2026-09-12
+
+### Critical
+- **Stop saving the masked credential back into the input field.**
+  The previous 1.1.7 UX change had `webui/setup-store.js:save()`
+  and `refresh()` pre-populate the credential `input` with the
+  masked display (`****AB12`). On the next Save (e.g. after
+  changing any unrelated field), `api/save.py` would treat that
+  masked display as a real credential and silently overwrite the
+  saved token / user key with the masked form, eventually emptying
+  them after several cycles. Fixed by:
+  * Removing the input-pre-population from `save()` and `refresh()`
+    in `webui/setup-store.js`. The masked display is still shown
+    to the user via the `.po-saved-badge` element in `main.html`,
+    just **outside** the input fields.
+  * Adding a defensive regex guard (`_MASKED_INPUT_RE`) in
+    `api/save.py` that silently drops any input that looks like a
+    masked display. This protects against any future regression
+    that puts the masked form back into the input.
+
+### Fixed
+- The "credentials disappear after every save" symptom. The token
+  and user key in `config.json` are no longer silently overwritten
+  by the masked display. If your saved token was already corrupt
+  from earlier saves, re-enter your real Application Token and
+  User (or Group) Key on the Setup page.
+
+### Defense-in-depth
+- Server-side `_MASKED_INPUT_RE` regex matches any input that
+  starts with one or more `*` and contains no other alphanumeric
+  characters. Anything matching is treated as empty by the save
+  handler, so the real saved value is preserved.
+
 ## [1.1.10] - 2026-09-12
 
 ### Fixed

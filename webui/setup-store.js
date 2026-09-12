@@ -140,15 +140,13 @@ export const store = createStore("push_zeroSetup", {
         this.configured = !!data.configured;
         this.maskedToken = data.masked_token || "";
         this.maskedUser = data.masked_user || "";
-        // Show the saved value (visually, as the masked display like
-        // '****AB12') inside the input fields too, so users can SEE
-        // that the credentials are still saved after navigating away
-        // and coming back. Plaintext is never placed in the DOM, only
-        // the masked form. The user can type to overwrite at any time.
-        if (this.configured) {
-          this.fields.token = this.maskedToken;
-          this.fields.user = this.maskedUser;
-        }
+        // NOTE: do NOT pre-populate the credential inputs with the masked
+        // display. The masked form looks plausible enough that the user
+        // submits it on the next Save, which would silently overwrite
+        // the real token in config.json via api/save.py. The masked
+        // display is rendered OUTSIDE the inputs by the .po-saved-badge
+        // in main.html, and the inputs stay empty until the user types
+        // a replacement value.
         const cfg = data.config || {};
         const defaults = cfg.defaults || {};
         const emergency = cfg.emergency || {};
@@ -193,13 +191,11 @@ export const store = createStore("push_zeroSetup", {
         this.maskedToken = data.masked_token || this.maskedToken;
         this.maskedUser = data.masked_user || this.maskedUser;
         this.configured = !!data.configured;
-        // Replace the input-field values with the new masked display
-        // (e.g. '****AB12') so the user can SEE what is currently
-        // saved and understands the save worked. Plaintext is never
-        // placed in the DOM; only the masked form is shown. The user
-        // can type at any time to replace the saved value.
-        this.fields.token = data.masked_token || this.maskedToken;
-        this.fields.user = data.masked_user || this.maskedUser;
+        // NOTE: do NOT put the masked display back into the credential
+        // inputs. The masked form is shown by the .po-saved-badge OUTSIDE
+        // the input fields. The inputs are intentionally cleared so the
+        // next Save cannot silently overwrite the real token with the
+        // masked display string.
         toastFrontendSuccess("Pushover configuration saved.", "Pushover");
         this.setStatus("Configuration saved.", "success");
         await this.refresh();

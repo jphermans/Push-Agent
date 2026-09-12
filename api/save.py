@@ -9,6 +9,7 @@ unintentionally. First-time saves require both fields.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from flask import Request
@@ -20,6 +21,20 @@ from usr.plugins.push_zero.helpers.config_helper import (
     get_raw_config,
     save_config,
 )
+
+
+# Defensive: any input that consists mostly or entirely of asterisks is
+# treated as a masked display, not as a real credential, and is ignored
+# so the user cannot silently overwrite a real token with its own masked
+# form. This belt-and-braces guard complements the frontend change that
+# stops putting the masked display back into the input fields.
+_MASKED_INPUT_RE = re.compile(r"^\*+[^*]*$")
+
+
+def _looks_like_masked_value(value: str) -> bool:
+    if not value:
+        return False
+    return bool(_MASKED_INPUT_RE.match(value))
 
 
 def _coerce_bool(value: Any) -> bool:
@@ -47,8 +62,15 @@ class Save(ApiHandler):
         cfg: dict[str, Any] = dict(existing)
 
         # First-time setup needs both fields; otherwise leave alone.
+        # Defensive: treat asterisk-heavy inputs as masked-display artifacts
+        # (a frontend regression could put the masked form back into the
+        # input on Save). We silently drop them here.
         token_input = (input.get("token") or "").strip()
         user_input = (input.get("user") or "").strip()
+        if _looks_like_masked_value(token_input):
+            token_input = ""
+        if _looks_like_masked_value(user_input):
+            user_input = ""
         if token_input:
             cfg["token"] = token_input
         elif not cfg.get("token"):

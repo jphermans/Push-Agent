@@ -1,7 +1,7 @@
 name: push_zero
 title: Pushover
 description: Send push notifications from Agent Zero through the Pushover API. Includes an agent-callable notification tool, a dedicated Setup page, connection testing, emergency notifications with receipts, and support for devices, sounds, URLs, TTL, and application API usage.
-version: 1.1.10
+version: 1.1.11
 created_by: "TODO: replace with your name and contact — e.g. 'Jane Doe <jane@example.com>'"
 author: "TODO: replace with your name (used by the Plugin card header)"
 homepage: "TODO: replace with your plugin/docs URL (used by Hub)"
