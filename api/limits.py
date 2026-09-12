@@ -51,7 +51,21 @@ class Limits(ApiHandler):
             "fetched_at": int(time.time()),
         }
         if not result.success:
-            payload["error"] = result.error or "; ".join(result.errors) or "Could not load Pushover limits."
+            raw_error = result.error or "; ".join(result.errors) or ""
+            # Pushover returns "resource not found" when the application has no
+            # monthly message limit configured (typical for free / unlimit-set apps).
+            # Translate that into a friendly, actionable message and flag it so the
+            # UI can hide the limits panel gracefully.
+            if "resource not found" in raw_error.lower() or "404" in raw_error:
+                payload["error"] = (
+                    "Pushover did not return usage information. "
+                    "This application has no monthly message limit set, "
+                    "so usage tracking is not available."
+                )
+                payload["not_available"] = True
+                payload["success"] = True
+            else:
+                payload["error"] = raw_error or "Could not load Pushover limits."
             return payload
 
         info = result.data or {}

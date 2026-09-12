@@ -749,3 +749,9 @@ _(no changes yet)_
 
 ### Fixed
 - **Hide host framework's plugin-settings modal footer when push_zero is active.** The host modal has its own "Reset to default / Save / Cancel" footer that calls a different code path than the plugin's own save handler. This caused a misleading UX where two "Save" buttons were visible and only the green plugin-internal "Save Configuration" button actually persisted settings. The host footer is now hidden via a scoped CSS rule (`body.push-zero-modal-active [data-modal-footer] { display: none }`) that is toggled by `setup-store.js:init()` / `cleanup()`.
+
+## [1.1.21] - 2026-09-12
+
+### Fixed
+- **Friendly message when Pushover app has no monthly limit.** The `/1/apps/limits.json` endpoint returns `errors=["resource not found"]` for free / unlimit-set applications. The Setup page now shows "This Pushover application has no monthly message limit set, so usage tracking is not available." instead of the raw "resource not found" error.
+- **Added `not_available` flag.** When the limits endpoint returns 404, the API now sets `not_available: true` so the frontend can hide the limits panel gracefully (rather than showing a misleading error in a permanent slot).
