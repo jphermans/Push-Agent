@@ -41,3 +41,4 @@ build/
 *.tar.gz
 *.whl
 config.json
+push_zero_config.json
