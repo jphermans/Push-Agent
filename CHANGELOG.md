@@ -9,6 +9,42 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.13] - 2026-09-12
+
+### Critical
+- **Fix `AttributeError: 'PushoverClient' object has no attribute
+  'validate_credentials'`** that broke the Setup page's **Test
+  Connection** button. The class method existed in source but the
+  running Agent Zero runtime was loading a stale ``__pycache__/push_
+  zero_client.cpython-3XX.pyc`` because the source file's mode had
+  drifted to ``0600 root-owned`` (the runtime runs as a non-root
+  user, so Python could not ``stat()`` the source to invalidate the
+  bytecode cache). Stale bytecode = old class = missing method =
+  AttributeError on every Test Connection click.
+
+### Fixed
+- Added a defensive ``_ensure_helpers_readable()`` helper to
+  ``hooks.py``. It normalises ``helpers/*.py`` to mode ``0o644``
+  (matching the surrounding plugin tree) and removes stale
+  ``__pycache__/<module>.cpython-*.pyc`` entries for the modules
+  the runtime imports at request time. It is invoked from both
+  ``install()`` and ``pre_update()`` so the runtime self-heals on
+  every lifecycle event — future root edits cannot recreate the
+  staleness.
+- All helper modules are now listed in a single
+  ``_HELPER_MODULES`` constant at the top of ``hooks.py``, so the
+  self-heal can be extended without surgery.
+
+### Notes
+- ``config.json`` handling is unchanged: it is still preserved
+  across updates via the existing backup-and-restore path.
+- No API contract changes for tools, no schema changes, no
+  settings UI changes.
+- The 1.1.10 ``validate_credentials`` endpoint fix (Test
+  Connection → ``/1/users/validate.json``) now actually reaches
+  the running client again, because the stale bytecode that was
+  shadowing it has been removed.
+
 ## [1.1.12] - 2026-09-12
 
 ### Changed

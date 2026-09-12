@@ -36,6 +36,14 @@ log = logging.getLogger("plugin.push_zero")
 
 PLUGIN_DIR: Path = Path(__file__).resolve().parent
 CONFIG_PATH: Path = PLUGIN_DIR / "config.json"
+HELPERS_DIR: Path = PLUGIN_DIR / "helpers"
+HELPERS_PYCACHE: Path = HELPERS_DIR / "__pycache__"
+
+# A source file the runtime imports for every PushoverClient call. We
+# keep this list here so the chmod/pyc-clear self-heal in
+# ``_ensure_helpers_readable`` always touches the modules that can
+# otherwise break the Setup page.
+_HELPER_MODULES: tuple[str, ...] = ("push_zero_client", "validation", "config_helper")
 
 # Where we stash a backup of the saved config outside the plugin tree so
 # it survives even a full directory replacement. /tmp is the simplest,
@@ -75,6 +83,68 @@ def _backup_config() -> bool:
     except Exception as exc:  # noqa: BLE001 - backup must never crash install
         log.warning(
             "Pushover plugin: could not back up config.json before update: %s",
+            exc,
+        )
+        return False
+
+
+def _ensure_helpers_readable() -> bool:
+    """Make sure every helper module is readable by the Agent Zero runtime.
+
+    When the plugin source tree is edited as root (or via a tool that
+    preserves the editor's uid/gid), ``helpers/*.py`` can end up with
+    mode 0600 root-owned while the surrounding files remain 0644
+    user-owned. Python then cannot ``stat()`` the source file to check
+    the bytecode cache's mtime, so it keeps loading a stale ``.pyc``
+    that lacks methods the new source defines. The visible symptom
+    is an ``AttributeError`` on a method the source clearly has —
+    exactly the failure mode that prompted this hook.
+
+    This helper is intentionally idempotent and defensive:
+
+    * chmod ``helpers/*.py`` to 0o644 (read for owner, group, world).
+    * delete stale ``__pycache__/<module>.cpython-{312,313}.pyc``
+      entries for the modules the runtime imports at request time,
+      so the next import re-compiles from readable source.
+    * never raise — chmod / unlink failures must not block lifecycle.
+    """
+    if not HELPERS_DIR.is_dir():
+        return False
+    fixed = 0
+    try:
+        for module_name in _HELPER_MODULES:
+            src = HELPERS_DIR / f"{module_name}.py"
+            if src.is_file():
+                try:
+                    src.chmod(0o644)
+                    fixed += 1
+                except OSError as exc:
+                    log.warning(
+                        "Pushover plugin: could not chmod %s: %s", src, exc
+                    )
+            if HELPERS_PYCACHE.is_dir():
+                for pyc in HELPERS_PYCACHE.glob(f"{module_name}.cpython-*.pyc"):
+                    try:
+                        pyc.unlink()
+                        log.info(
+                            "Pushover plugin: removed stale bytecode %s",
+                            pyc,
+                        )
+                    except OSError as exc:
+                        log.warning(
+                            "Pushover plugin: could not remove %s: %s",
+                            pyc,
+                            exc,
+                        )
+        if fixed:
+            log.info(
+                "Pushover plugin: normalised mode on %d helper module(s).",
+                fixed,
+            )
+        return True
+    except Exception as exc:  # noqa: BLE001 - never crash install
+        log.warning(
+            "Pushover plugin: helper self-heal encountered an error: %s",
             exc,
         )
         return False
@@ -127,11 +197,19 @@ def install() -> None:
     key, defaults, emergency settings, advanced settings) survives the
     update, we back up any existing config.json before doing any work
     and restore it after the install completes.
+
+    We also run ``_ensure_helpers_readable()`` so that any helper
+    modules the runtime imports (notably ``push_zero_client``) end up
+    with mode 0o644 and a fresh bytecode cache after install. Without
+    this, the runtime can keep loading a stale ``.pyc`` that lacks
+    methods the new source defines — surfacing as ``AttributeError`` on
+    every request until someone manually clears the cache.
     """
     backed_up = _backup_config()
     log.info("Pushover plugin: install() called; plugin is ready to use.")
     if backed_up:
         _restore_config()
+    _ensure_helpers_readable()
 
 
 def pre_update() -> None:
@@ -142,11 +220,16 @@ def pre_update() -> None:
     files. ``uninstall()`` is intentionally a no-op for config because
     Agent Zero may invoke it during a code update, not just a full
     removal.
+
+    We also normalise helper file modes here so that any helpers the
+    update touches remain readable by the runtime after the framework
+    finishes swapping files in.
     """
     _backup_config()
     log.info(
         "Pushover plugin: pre_update() called; config backed up if present."
     )
+    _ensure_helpers_readable()
 
 
 def uninstall() -> None:
