@@ -343,7 +343,10 @@
           <div class="po-section-body">
             <div class="po-field">
               <label>Application / API Token</label>
-              <input type="text" autocomplete="off" x-model="$store.push_zeroSetup.fields.token"
+              <input type="text" autocomplete="off"
+                x-model="$store.push_zeroSetup.fields.token"
+                x-on:focus="$store.push_zeroSetup.handleCredentialFocus('token')"
+                x-on:blur="$store.push_zeroSetup.handleCredentialBlur('token')"
                 placeholder="Paste your application token" />
               <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">
@@ -363,7 +366,10 @@
             </div>
             <div class="po-field" style="margin-top:10px;">
               <label>User / Group Key</label>
-              <input type="text" autocomplete="off" x-model="$store.push_zeroSetup.fields.user"
+              <input type="text" autocomplete="off"
+                x-model="$store.push_zeroSetup.fields.user"
+                x-on:focus="$store.push_zeroSetup.handleCredentialFocus('user')"
+                x-on:blur="$store.push_zeroSetup.handleCredentialBlur('user')"
                 placeholder="Paste your user or group key" />
               <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">

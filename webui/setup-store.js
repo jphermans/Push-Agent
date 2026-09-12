@@ -140,13 +140,17 @@ export const store = createStore("push_zeroSetup", {
         this.configured = !!data.configured;
         this.maskedToken = data.masked_token || "";
         this.maskedUser = data.masked_user || "";
-        // NOTE: do NOT pre-populate the credential inputs with the masked
-        // display. The masked form looks plausible enough that the user
-        // submits it on the next Save, which would silently overwrite
-        // the real token in config.json via api/save.py. The masked
-        // display is rendered OUTSIDE the inputs by the .po-saved-badge
-        // in main.html, and the inputs stay empty until the user types
-        // a replacement value.
+        // Populate the credential inputs with the MASKED display
+        // (e.g. "****…esmm") rather than the plaintext. This gives the
+        // user a visible confirmation of what is saved without exposing
+        // the full secret. The api/save.py handler has a defensive
+        // _MASKED_INPUT_RE regex that silently drops any asterisk-heavy
+        // input on Save, so an unsubmitted-mask click is a no-op for
+        // credentials rather than a corruption.
+        this.fields.token = this.maskedToken;
+        this.fields.user = this.maskedUser;
+        this._tokenFocused = false;
+        this._userFocused = false;
         const cfg = data.config || {};
         const defaults = cfg.defaults || {};
         const emergency = cfg.emergency || {};
@@ -182,6 +186,42 @@ export const store = createStore("push_zeroSetup", {
     }
   },
 
+  handleCredentialFocus(field) {
+    // Clear the input on focus so the user can immediately type a
+    // replacement value without first backspacing over the mask.
+    // We track focus state so handleCredentialBlur can restore the
+    // mask if the user focused but did not type.
+    if (field === "token") {
+      this._tokenFocused = true;
+      if (this.fields.token === this.maskedToken) {
+        this.fields.token = "";
+      }
+    } else if (field === "user") {
+      this._userFocused = true;
+      if (this.fields.user === this.maskedUser) {
+        this.fields.user = "";
+      }
+    }
+  },
+
+  handleCredentialBlur(field) {
+    // If the user focused and then blurred without typing anything,
+    // restore the masked display so the visible confirmation is
+    // preserved. If they typed something, leave the field as-is —
+    // they will see a fresh masked form on the next save.
+    if (field === "token") {
+      this._tokenFocused = false;
+      if (this.fields.token === "" && this.maskedToken) {
+        this.fields.token = this.maskedToken;
+      }
+    } else if (field === "user") {
+      this._userFocused = false;
+      if (this.fields.user === "" && this.maskedUser) {
+        this.fields.user = this.maskedUser;
+      }
+    }
+  },
+
   async save() {
     this.saving = true;
     try {
@@ -191,11 +231,12 @@ export const store = createStore("push_zeroSetup", {
         this.maskedToken = data.masked_token || this.maskedToken;
         this.maskedUser = data.masked_user || this.maskedUser;
         this.configured = !!data.configured;
-        // NOTE: do NOT put the masked display back into the credential
-        // inputs. The masked form is shown by the .po-saved-badge OUTSIDE
-        // the input fields. The inputs are intentionally cleared so the
-        // next Save cannot silently overwrite the real token with the
-        // masked display string.
+        // Reflect the freshly-saved masked form in the inputs so the
+        // user can visually confirm the new value. The api/save.py
+        // defensive regex drops any asterisk-heavy input, so this is
+        // safe even if the user clicked Save without typing.
+        this.fields.token = this.maskedToken;
+        this.fields.user = this.maskedUser;
         toastFrontendSuccess("Pushover configuration saved.", "Pushover");
         this.setStatus("Configuration saved.", "success");
         await this.refresh();

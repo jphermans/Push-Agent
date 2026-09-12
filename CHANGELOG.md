@@ -9,6 +9,44 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.14] - 2026-09-12
+
+### Changed
+- **Setup page credential inputs now show the masked display
+  inline** (e.g. `****…esmm` for the application token,
+  `****…vhD9` for the user/group key) instead of being empty.
+  The user asked for partial visibility — they want to see
+  *something* in the field to confirm what's saved, but never the
+  full plaintext. The masked form is rendered into the input by
+  `setup-store.js:refresh()` and `setup-store.js:save()`, and the
+  `.po-saved-badge` below the input continues to render the same
+  masked form for redundancy and screen-reader accessibility.
+- On focus, the credential input clears so the user can immediately
+  type a replacement value without first backspacing over the
+  mask. On blur, if the field is still empty, the masked form is
+  restored. Two new helpers — `handleCredentialFocus()` and
+  `handleCredentialBlur()` — implement this transition
+  idempotently.
+
+### Defense-in-depth (unchanged from 1.1.11)
+- `api/save.py`'s `_MASKED_INPUT_RE` regex continues to silently
+  drop any asterisk-heavy input on Save. So an unsubmitted-mask
+  click is a no-op for credentials, never a corruption. The
+  re-introduction of the masked-form-into-input pattern is safe
+  only because that defensive regex is in place.
+
+### Notes
+- This is a UX-only release. No API contract changes for tools,
+  no schema changes, no settings UI changes outside the Setup
+  page's two credential inputs.
+- The `<input type="text" autocomplete="off" …>` declarations are
+  retained so browser password managers are still hinted not to
+  refilled the field. The 1.1.13 stale-bytecode self-heal in
+  `hooks.py:_ensure_helpers_readable()` is unaffected.
+- The 1.1.10 Test Connection endpoint, the 1.1.11
+  anti-corruption guard, and the 1.1.13 bytecode heal all
+  remain in place and continue to work.
+
 ## [1.1.13] - 2026-09-12
 
 ### Critical

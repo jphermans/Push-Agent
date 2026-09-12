@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/AUTH_LOGIN/Push-Agent"><img src="https://img.shields.io/badge/repo-Push--Agent-2A5C8F?style=for-the-badge&logo=github" alt="Repository" /></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-1.1.13-E74C3C?style=for-the-badge" alt="Version" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-1.1.14-E74C3C?style=for-the-badge" alt="Version" /></a>
   <a href="#"><img src="https://img.shields.io/badge/license-MIT-28a745?style=for-the-badge" alt="License" /></a>
   <a href="#"><img src="https://img.shields.io/badge/Agent_Zero-compatible-2A5C8F?style=for-the-badge" alt="Agent Zero compatibility" /></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.10%2B-f39c12?style=for-the-badge&logo=python" alt="Python" /></a>
@@ -300,4 +300,4 @@ The plugin's `hooks.py` is idempotent and clean — no orphan files, no schema r
 
 ---
 
-<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.13.</sub>
+<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.14.</sub>
