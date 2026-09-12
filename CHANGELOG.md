@@ -9,6 +9,30 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.3] - 2026-09-12
+
+### Changed
+- **Thumbnail now embeds a stylized Agent Zero 'zero' mark.** Both
+  `thumbnail.png` (plugin root) and `webui/thumbnail.png` are now
+  byte-identical (1,344 B) and combine:
+  * the existing Pushover coral brand panel (rounded squircle, 28 px),
+  * a bold white outline ring centred slightly left, visually rhyming
+    with the Agent Zero '0' mark,
+  * a chunky white forward-chevron inside the ring with a dark inset
+    detail, evoking the Agent Zero chevron motif, and
+  * a tiny white-haloed notification badge top-right (red dot with
+    exclamation mark) so the icon still reads as 'push
+    notification' even at thumbnail size.
+- PNG is still 128 x 128 RGBA, optimised, well under the 20 KB Agent
+  Zero Hub ceiling. Pixel-sampled against the design intent (coral
+  panel, dark chevron inset, white badge halo) and confirmed at
+  every sampled anchor point.
+
+### Notes
+- Asset replacement only. No runtime, API, configuration, route,
+  import or theme behaviour changed. All runtime expectations from
+  1.1.2 carry forward unchanged.
+
 ## [1.1.2] - 2026-09-12
 
 ### Fixed
