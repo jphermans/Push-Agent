@@ -5,6 +5,18 @@ All notable changes to the Pushover plugin are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [1.1.23] - 2026-09-12
+
+### Documentation
+
+- **Field Reference section in README** — comprehensive reference for every Setup-page field: type, default, validation rules, and where each field flows (Setup → agent tool → Pushover API). Sections cover: Credentials, Notification Defaults, Emergency Notifications, Advanced Settings, Tags & Callback, Agent tool mapping, Validation rules summary, and Storage architecture.
+- **Inline help text under every Setup-page input** — 17 fields per page now have a short explanation right below the input (`po-field-help` class). Covers token, user, device, title, priority, sound, ttl, url, url_title, html, monospace, retry, expire, callback, tags, timeout, debug.
+- **Cache-bust query string bumped** to `?v=1.1.23` in both `webui/main.html` and `webui/config.html`, so the browser picks up the new help-text module on next load.
+
+### No code changes
+
+Pure documentation release. All `api/*.py`, `helpers/*.py`, `tools/*.py`, `hooks.py`, `plugin.yaml` runtime fields are identical to 1.1.22.
 ## [1.1.22] - 2026-09-12
 
 ### Security

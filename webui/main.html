@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>Pushover Setup</title>
   <script type="module">
-    import { store } from "/plugins/push_zero/webui/setup-store.js?v=1.1.22";
+    import { store } from "/plugins/push_zero/webui/setup-store.js?v=1.1.23";
   </script>
   <style>
     /*
@@ -309,7 +309,14 @@
           justify-content: center;
         }
       }
-  </style>
+  
+              .po-field-help {
+                font-size: 0.82em;
+                color: var(--color-text-muted, #666);
+                margin-top: 3px;
+                line-height: 1.35;
+              }
+            </style>
 </head>
 <body>
   <div x-data x-init="$store.push_zeroSetup && $store.push_zeroSetup.init()"
@@ -398,6 +405,7 @@
                 x-on:focus="$store.push_zeroSetup.handleCredentialFocus('token')"
                 x-on:blur="$store.push_zeroSetup.handleCredentialBlur('token')"
                 placeholder="Paste your application token" />
+              <div class="po-field-help">Pushover application/API token. 30 characters. Created on pushover.net → Apps & Plugins. Treated as a secret.</div>
               <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">
                   <span class="po-saved-badge">
@@ -421,6 +429,7 @@
                 x-on:focus="$store.push_zeroSetup.handleCredentialFocus('user')"
                 x-on:blur="$store.push_zeroSetup.handleCredentialBlur('user')"
                 placeholder="Paste your user or group key" />
+              <div class="po-field-help">Pushover user/group key. 30 characters. Cannot be self-rotated on Pushover (platform limit).</div>
               <div class="po-field-hint">
                 <template x-if="$store.push_zeroSetup.configured">
                   <span class="po-saved-badge">
@@ -441,6 +450,7 @@
               <label>Device (optional)</label>
               <input type="text" autocomplete="off" x-model="$store.push_zeroSetup.fields.device"
                 placeholder="e.g. iphone or ipad (leave blank for all devices)" />
+              <div class="po-field-help">Optional device scope for the Test Connection / Test Notification buttons. Same syntax as the default device.</div>
               <div class="po-muted">Configuring a device is optional. Leave blank to send to all devices.</div>
             </div>
           </div>
@@ -459,6 +469,7 @@
               <div class="po-field">
                 <label>Default priority</label>
                 <select x-model="$store.push_zeroSetup.fields.priority">
+              <div class="po-field-help">Pushover priority. Friendly: lowest/low/normal/high/emergency. Internal: -2/-1/0/+1/+2.</div>
                   <template x-for="opt in $store.push_zeroSetup.priorityOptions" x-bind:key="opt.value">
                     <option x-bind:value="opt.value" x-text="opt.label"></option>
                   </template>
@@ -467,6 +478,7 @@
               <div class="po-field">
                 <label>Default sound</label>
                 <select x-model="$store.push_zeroSetup.fields.sound">
+              <div class="po-field-help">Pushover notification sound. Empty = user's Pushover preference. Non-empty = specific sound slug.</div>
                   <template x-for="s in $store.push_zeroSetup.sounds" x-bind:key="s.slug">
                     <option x-bind:value="s.slug" x-text="s.label"></option>
                   </template>
@@ -477,43 +489,51 @@
                 <label>Default device</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.default_device"
                   placeholder="All devices" />
+              <div class="po-field-help">Optional device scope for all notifications. Examples: iphone, ipad, iphone,ipad. Empty = all devices.</div>
               </div>
               <div class="po-field">
                 <label>Default TTL (seconds)</label>
                 <input type="number" min="0" x-model="$store.push_zeroSetup.fields.ttl"
                   placeholder="3600 = one hour" />
+              <div class="po-field-help">Time-to-live in seconds. 3600 = one hour. Empty = no expiry. Max 604800 (7 days).</div>
                 <div class="po-muted">Empty for Pushover default. Maximum 604800 (7 days).</div>
               </div>
               <div class="po-field">
                 <label>Default URL</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.url"
                   placeholder="https://example.com" />
+              <div class="po-field-help">Supplementary URL attached to every notification. Tappable in the Pushover app.</div>
               </div>
               <div class="po-field">
                 <label>Default URL title</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.url_title"
                   placeholder="Open dashboard" />
+              <div class="po-field-help">Display text for the URL. Ignored if URL is empty.</div>
               </div>
               <div class="po-field">
                 <label>Default tags (comma-separated)</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.tags"
                   placeholder="agent-zero, alerts" />
+              <div class="po-field-help">Comma-separated tag list. Used by Pushover for filtering/grouping in the dashboard.</div>
               </div>
               <div class="po-field">
                 <label>Default callback URL</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.default_callback"
                   placeholder="https://example.com/callback" />
+              <div class="po-field-help">Default ack URL for non-emergency notifications. Mirrors emergency.callback.</div>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
               <label class="po-checkbox">
                 <input type="checkbox" x-model="$store.push_zeroSetup.fields.html"
                   x-on:change="$store.push_zeroSetup.toggleHtml()" />
+              <div class="po-field-help">When on, the message body is parsed as a small HTML subset (<b>, <i>, <a href>, <br>, <h1-h6>, inline style=).</div>
                 <span>Enable HTML formatting</span>
               </label>
               <label class="po-checkbox">
                 <input type="checkbox" x-model="$store.push_zeroSetup.fields.monospace"
                   x-on:change="$store.push_zeroSetup.toggleMonospace()" />
+              <div class="po-field-help">When on, the entire message is rendered in monospace. Mutually exclusive with HTML.</div>
                 <span>Enable monospace formatting</span>
               </label>
               <div class="po-muted">HTML and monospace cannot both be enabled; enabling one disables the other.</div>
@@ -534,17 +554,20 @@
               <div class="po-field">
                 <label>Retry interval (seconds)</label>
                 <input type="number" min="30" x-model.number="$store.push_zeroSetup.fields.retry" />
+              <div class="po-field-help">How often Pushover re-sends an emergency notification while un-acknowledged. Min 30 seconds.</div>
                 <div class="po-muted">Minimum 30 seconds. Recommended 60.</div>
               </div>
               <div class="po-field">
                 <label>Expire after (seconds)</label>
                 <input type="number" min="0" x-model.number="$store.push_zeroSetup.fields.expire" />
+              <div class="po-field-help">Maximum lifetime of the emergency notification. 0 = no expiry. Range 30..10800 seconds (3h max).</div>
                 <div class="po-muted">0 = never expire. Maximum 10800 (3 hours).</div>
               </div>
               <div class="po-field">
                 <label>Acknowledgment callback URL</label>
                 <input type="text" x-model="$store.push_zeroSetup.fields.callback"
                   placeholder="https://example.com/ack" />
+              <div class="po-field-help">Acknowledgement callback URL — Pushover POSTs to it on user ack (emergency only).</div>
               </div>
             </div>
           </div>
@@ -560,11 +583,13 @@
               <div class="po-field">
                 <label>HTTP timeout (seconds)</label>
                 <input type="number" min="1" max="60" x-model.number="$store.push_zeroSetup.fields.timeout" />
+              <div class="po-field-help">HTTP timeout for Pushover API calls (seconds). Range 1..60. Recommended 10..15.</div>
                 <div class="po-muted">Recommended 10 - 15 seconds.</div>
               </div>
             </div>
             <label class="po-checkbox">
               <input type="checkbox" x-model="$store.push_zeroSetup.fields.debug" />
+              <div class="po-field-help">Extra logging to A0 framework logger. Credentials are always masked, even in debug output.</div>
               <span>Enable API debug logging (credentials are always masked)</span>
             </label>
           </div>

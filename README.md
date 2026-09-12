@@ -300,4 +300,101 @@ The plugin's `hooks.py` is idempotent and clean — no orphan files, no schema r
 
 ---
 
-<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.22.</sub>
+## 📖 Field Reference
+
+Every field on the Setup page, what it controls, when it applies, and how it is validated. Defaults shown are the values the plugin writes when the field is left empty.
+
+### 🔑 Credentials
+
+| Field | Type | Default | Meaning |
+| :--- | :--- | :--- | :--- |
+| `token` | string (30 chars) | — **(required)** | The Pushover application/API token. Created on [pushover.net → Apps & Plugins](https://pushover.net/apps/build). Treated as a secret — the Setup page renders a masked form (`****…q49i`) once saved. |
+| `user` | string (30 chars) | — **(required)** | The Pushover user key or group key that receives notifications. Cannot be self-rotated on Pushover's platform — see `SECURITY.md` for the residual-risk note. |
+| `device` | string (comma-separated device names) | `""` (all devices) | Optional device scope. Empty means every device the user/group owns. Examples: `iphone`, `ipad`, `iphone,ipad`. |
+
+### 🔔 Notification Defaults
+
+These values are sent **only when the agent's `push_zero_notify` call omits the same field**. They are the fallback layer between the plugin and the Pushover API.
+
+| Field | Type | Default | Meaning |
+| :--- | :--- | :--- | :--- |
+| `defaults.title` | string | `"Agent Zero"` | Title shown in bold above the message body. Empty input is replaced by the default; whitespace is stripped. |
+| `defaults.priority` | string (friendly) → int | `"normal"` (0) | Pushover priority level. Friendly values `lowest` / `low` / `normal` / `high` / `emergency` are normalised to `-2` / `-1` / `0` / `+1` / `+2`. The agent tool accepts either form. |
+| `defaults.sound` | string (sound slug) | `""` (User default) | Pushover notification sound. Empty string → the user's Pushover sound preference is used. Non-empty → specific sound slug (e.g. `magic`, `bike`, `bugle`). |
+| `defaults.device` | string | `""` (all devices) | Per-notification device scope. Same syntax as the top-level `device` field. |
+| `defaults.ttl` | string (int seconds) | `""` (no TTL) | Time-to-live in seconds. Empty → Pushover default (no expiry). `3600` = one hour; `86400` = one day; max 604800 (7 days). Numeric input is coerced to string. |
+| `defaults.url` | string (URL) | `""` | Supplementary URL attached to the notification. Tappable in the Pushover app. |
+| `defaults.url_title` | string | `""` | Display text for the URL. If `url` is empty, `url_title` is ignored. |
+| `defaults.html` | bool | `false` | When `true`, the message body is parsed as a small HTML subset (`<b>`, `<i>`, `<a href>`, `<br>`, `<ul>`, `<h1-h6>`, inline `style=`). |
+| `defaults.monospace` | bool | `false` | When `true`, the entire message body is rendered in monospace. Incompatible with `html` — enabling one disables the other automatically. |
+
+### 🚨 Emergency Notifications
+
+These settings only apply when the agent sends a message with `priority == emergency` (or `+2`). They control how Pushover retries the notification until it is acknowledged.
+
+| Field | Type | Default | Constraints | Meaning |
+| :--- | :--- | :--- | :--- | :--- |
+| `emergency.retry` | int (seconds) | `60` | `≥ 30` | How often Pushover re-sends the emergency notification while it remains un-acknowledged. |
+| `emergency.expire` | int (seconds) | `3600` | `0` (no expiry) or `30..10800` | Maximum lifetime of the emergency notification. After this many seconds Pushover stops retrying. `10800` = 3 hours (Pushover's hard limit). |
+| `emergency.callback` | string (URL) | `""` | Optional | Acknowledgement callback URL — Pushover POSTs to it when the user acknowledges. |
+
+The Settings page validates: `retry >= 30` and `expire <= 10800`. Values outside the range are clamped to the nearest boundary.
+
+### 🛠️ Advanced Settings
+
+| Field | Type | Default | Meaning |
+| :--- | :--- | :--- | :--- |
+| `advanced.timeout` | int (seconds) | `15` | HTTP timeout for all Pushover API calls. `1..60` range; values outside are clamped. Recommended `10..15`. |
+| `advanced.debug` | bool | `false` | When `true`, the plugin logs additional request/response metadata to the A0 framework logger. Credentials are always masked, even in debug output. |
+
+### 🏷️ Tags & Callback (top-level)
+
+| Field | Type | Default | Meaning |
+| :--- | :--- | :--- | :--- |
+| `tags` | list[string] | `[]` | Comma-separated tag list in the UI; joined to Pushover's `tags` parameter on send. Used by Pushover for filtering and grouping in the dashboard. |
+| `callback` | string (URL) | `""` | Default acknowledgement callback for **non-emergency** notifications. Mirrors `emergency.callback` but applies to all priorities. |
+
+### 🤖 Agent tool field mapping
+
+When the agent calls `push_zero_notify`, every parameter is **optional** except `message`. Anything omitted falls back to the corresponding `defaults.*` value from this page.
+
+| Tool parameter | Setup page equivalent |
+| :--- | :--- |
+| `message` | — (always required) |
+| `title` | `defaults.title` |
+| `priority` | `defaults.priority` (or `-2..2` int) |
+| `sound` | `defaults.sound` |
+| `device` | `defaults.device` |
+| `url` / `url_title` | `defaults.url` / `defaults.url_title` |
+| `ttl` | `defaults.ttl` |
+| `html` / `monospace` | `defaults.html` / `defaults.monospace` |
+| `retry` / `expire` | `emergency.retry` / `emergency.expire` |
+| `callback` | `emergency.callback` (for emergency) or `callback` (otherwise) |
+| `tags` | `tags` |
+
+### 🧪 Validation rules summary
+
+| Field | Rule |
+| :--- | :--- |
+| `token` / `user` | required; non-empty after Save; masked-input pattern (`****…`) rejected |
+| `priority` | must be one of `lowest` / `low` / `normal` / `high` / `emergency` |
+| `ttl` | integer seconds; max 604800 |
+| `emergency.retry` | integer seconds; `>= 30` |
+| `emergency.expire` | integer seconds; `0` or `30..10800` |
+| `advanced.timeout` | integer seconds; `1..60` |
+| `html` + `monospace` | mutually exclusive — last-clicked wins |
+| `url` / `url_title` | URL string; `url_title` ignored when `url` empty |
+| `device` | comma-separated device names; empty = all |
+
+### 📦 Storage
+
+All fields are persisted in **two** locations:
+
+1. **Primary**: `<plugin_dir>/push_zero_config.json` — readable directly by the user. This is the source of truth.
+2. **Mirror**: Agent Zero's framework storage (`core_plugins.save_plugin_config`) — kept in sync on every Save.
+
+The Setup page reads from disk on open; writes go to both layers on Save; the page hydrates from disk on the next open, with full masking of credentials.
+
+---
+
+<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.23.</sub>
