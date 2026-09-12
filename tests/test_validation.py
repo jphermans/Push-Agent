@@ -13,7 +13,7 @@ ROOT_DIR = Path("/a0")
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from usr.plugins.pushover.helpers.validation import (
+from usr.plugins.push_zero.helpers.validation import (
     build_message_payload,
     coalesce_defaults,
 )

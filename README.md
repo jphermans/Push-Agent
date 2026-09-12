@@ -6,12 +6,12 @@ with an agent-callable notification tool, a dedicated Setup page, and
 configuration persistence following the modern Agent Zero plugin
 conventions.
 
-> Local plugin: this plugin lives at `/a0/usr/plugins/pushover/` and does
+> Local plugin: this plugin lives at `/a0/usr/plugins/push_zero/` and does
 > not modify any Agent Zero core files.
 
 ## Features
 
-- Agent-callable `pushover_notify` tool with `send`, `test`,
+- Agent-callable `push_zero_notify` tool with `send`, `test`,
   `receipt_status`, `cancel`, and `cancel_by_tag` actions.
 - Dedicated **Pushover Setup** page reachable from External Services.
 - Per-user masking of credentials on the Setup page; secrets are stored
@@ -38,7 +38,7 @@ conventions.
 ## Installation
 
 The plugin is loaded automatically by Agent Zero once it is present in
-`/a0/usr/plugins/pushover/`. No manual install command is required.
+`/a0/usr/plugins/push_zero/`. No manual install command is required.
 
 1. Open the Agent Zero UI and navigate to **Settings &rarr; Plugins**.
 2. Make sure **Pushover** is enabled.
@@ -46,7 +46,7 @@ The plugin is loaded automatically by Agent Zero once it is present in
    **Settings &rarr; External Services**.
 
 If you are installing from a Git URL or ZIP, copy the plugin directory
-into `/a0/usr/plugins/pushover/` and reload the WebUI. The framework
+into `/a0/usr/plugins/push_zero/` and reload the WebUI. The framework
 will call `hooks.install()` automatically; there is no separate `Execute`
 button to press.
 
@@ -88,7 +88,7 @@ page itself renders a 6-step quick-link list near its footer.
 ## Testing the connection
 
 Use either the **Test Connection** button on the Setup page or call
-`POST /api/plugins/pushover/test`. The endpoint:
+`POST /api/plugins/push_zero/test`. The endpoint:
 
 - Validates the application token via `GET /1/apps/limits.json`.
 - Sends a lowest-priority test notification to validate the user key.
@@ -97,12 +97,12 @@ Use either the **Test Connection** button on the Setup page or call
 ## Sending test notifications
 
 Use the **Send Test Notification** button or
-`POST /api/plugins/pushover/test_notify`. The handler uses the
+`POST /api/plugins/push_zero/test_notify`. The handler uses the
 configured defaults (title, priority, sound, device, TTL, formatting).
 
 ## Agent tool usage
 
-The plugin exposes a single tool, `pushover_notify`. The minimum call is:
+The plugin exposes a single tool, `push_zero_notify`. The minimum call is:
 
 ```json
 {
@@ -229,7 +229,7 @@ Disable and remove the plugin from Settings &rarr; Plugins. The plugin's
 ## Files
 
 ```
-usr/plugins/pushover/
+usr/plugins/push_zero/
 ├── plugin.yaml
 ├── default_config.yaml
 ├── README.md
@@ -240,11 +240,11 @@ usr/plugins/pushover/
 ├── hooks.py
 ├── helpers/
 │   ├── __init__.py
-│   ├── pushover_client.py
+│   ├── push_zero_client.py
 │   ├── config_helper.py
 │   └── validation.py
 ├── tools/
-│   └── pushover_notify.py
+│   └── push_zero_notify.py
 ├── api/
 │   ├── test.py
 │   ├── validate.py
@@ -255,7 +255,7 @@ usr/plugins/pushover/
 │   ├── test_notify.py
 │   └── reset.py
 ├── prompts/
-│   └── fw.pushover.tool.md
+│   └── fw.push_zero.tool.md
 ├── webui/
 │   ├── main.html                 # dedicated Pushover Setup page (Plugins card)
 │   ├── config.html               # External Services panel entry (Settings → Pushover)

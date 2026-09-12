@@ -526,7 +526,7 @@ class PushoverClient:
     def _request(self, method: str, path: str, params: dict[str, Any]) -> PushoverResult:
         if self.debug:
             print(
-                "[pushover] request",
+                "[push_zero] request",
                 method,
                 path,
                 safe_request_params(params),
@@ -586,7 +586,7 @@ class PushoverClient:
         finally:
             elapsed = time.monotonic() - start
             if self.debug:
-                print(f"[pushover] response in {elapsed:.2f}s", status if 'status' in locals() else "-")
+                print(f"[push_zero] response in {elapsed:.2f}s", status if 'status' in locals() else "-")
 
         return self._decode_payload(path, status, raw)
 

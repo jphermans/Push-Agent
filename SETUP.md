@@ -85,7 +85,7 @@ lets you audit and revoke per integration.
 ## Install the plugin in Agent Zero
 
 If you are running Agent Zero from the bundled development checkout, the
-plugin is already shipped at `/a0/usr/plugins/pushover/`. Just enable it:
+plugin is already shipped at `/a0/usr/plugins/push_zero/`. Just enable it:
 
 1. Open the Agent Zero UI.
 2. Go to **Settings &rarr; Plugins**.
@@ -96,8 +96,8 @@ plugin is already shipped at `/a0/usr/plugins/pushover/`. Just enable it:
 If you are installing from a remote source (a public repo, a tarball,
 or your own fork):
 
-1. Copy the plugin directory into `/a0/usr/plugins/pushover/` so that
-   `plugin.yaml` sits at `/a0/usr/plugins/pushover/plugin.yaml`.
+1. Copy the plugin directory into `/a0/usr/plugins/push_zero/` so that
+   `plugin.yaml` sits at `/a0/usr/plugins/push_zero/plugin.yaml`.
 2. Reload the WebUI (or restart `run_ui.py`). The framework calls
    `hooks.install()` automatically; no manual `Execute` step is needed.
 3. Enable the plugin as above.
@@ -154,7 +154,7 @@ of your credentials is wrong (the Setup page never tells you *which*
 because of security hygiene, but the answers below cover both
 cases).
 
-If you prefer scripting the verification, `POST /api/plugins/pushover/test`
+If you prefer scripting the verification, `POST /api/plugins/push_zero/test`
 produces the same response as a JSON body you can parse from a CI run.
 
 ## Send a real test notification
@@ -181,7 +181,7 @@ The same Setup page exposes:
 
 | Section | What it controls |
 |---|---|
-| **Notification Defaults** | The default `title`, `priority`, `sound`, `device`, `ttl`, `url`, `url_title`, `html`, `monospace` applied whenever the agent calls `pushover_notify` without explicitly overriding them. |
+| **Notification Defaults** | The default `title`, `priority`, `sound`, `device`, `ttl`, `url`, `url_title`, `html`, `monospace` applied whenever the agent calls `push_zero_notify` without explicitly overriding them. |
 | **Emergency Notifications** | The `retry` interval (≥ 30 s, default 60 s) and `expire` ceiling (≤ 10 800 s, default 3 600 s) for `priority=emergency` notifications. See *Emergency notifications* in the README for the retry-loop semantics. |
 | **Device & Sound** | Lets you pin one device or a comma-separated device list, and pick a default `sound` (selected from `/1/sounds.json` with a `User default` option). |
 | **API Usage** | Mirrors of `GET /1/apps/limits.json` — your monthly message budget, current usage, and reset date. Failures here never block sending. |
@@ -197,7 +197,7 @@ example:
 
 > Send a Pushover notification saying the daily backup completed.
 
-The agent calls the `pushover_notify` tool with `action="send"`. You can
+The agent calls the `push_zero_notify` tool with `action="send"`. You can
 also call it directly from a custom tool chain. The minimum call is:
 
 ```json
@@ -289,7 +289,7 @@ A: Disable and remove the plugin in **Settings &rarr; Plugins**; the
 
 **Q: Where is the configuration actually saved?**
 A: In Agent Zero's per-plugin scope through
-`helpers.plugins.save_plugin_config(pushover)`. Removing the user file at
+`helpers.plugins.save_plugin_config(push_zero)`. Removing the user file at
 the location referenced by `helpers.settings` will also reset it
 immediately; the Setup page is the recommended path.
 

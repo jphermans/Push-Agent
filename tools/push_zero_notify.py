@@ -1,4 +1,4 @@
-"""Pushover notification tool (``pushover_notify``).
+"""Pushover notification tool (``push_zero_notify``).
 
 This is the Agent Zero tool surface for the Pushover integration. Agents
 invoke it through the standard tool protocol:
@@ -35,18 +35,18 @@ from typing import Any
 
 from helpers.tool import Response, Tool
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_credentials,
     get_raw_config,
     is_configured,
 )
-from usr.plugins.pushover.helpers.pushover_client import (
+from usr.plugins.push_zero.helpers.push_zero_client import (
     PushoverClient,
     normalize_priority,
     priority_label,
     validate_emergency_retry,
 )
-from usr.plugins.pushover.helpers.validation import (
+from usr.plugins.push_zero.helpers.validation import (
     build_message_payload,
     coalesce_defaults,
 )

@@ -28,8 +28,8 @@ ROOT_DIR = Path("/a0")
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from usr.plugins.pushover.helpers import pushover_client as client_module
-from usr.plugins.pushover.helpers.pushover_client import (
+from usr.plugins.push_zero.helpers import push_zero_client as client_module
+from usr.plugins.push_zero.helpers.push_zero_client import (
     PUSHOVER_MESSAGE_PATH,
     PRIORITY_FRIENDLY,
     PRIORITY_NUMERIC,
@@ -40,7 +40,7 @@ from usr.plugins.pushover.helpers.pushover_client import (
     stringify_tags,
     validate_tags,
 )
-from usr.plugins.pushover.helpers.validation import (
+from usr.plugins.push_zero.helpers.validation import (
     build_message_payload,
     coalesce_defaults,
 )
@@ -315,7 +315,7 @@ class ToolModuleTests(unittest.TestCase):
     """Sanity-check the public surface of the tool module."""
 
     def test_class_and_prompt(self):
-        from usr.plugins.pushover.tools import pushover_notify as tn
+        from usr.plugins.push_zero.tools import push_zero_notify as tn
         from helpers.tool import Tool as BaseTool
         self.assertTrue(hasattr(tn, "PushoverNotify"))
         self.assertTrue(issubclass(tn.PushoverNotify, BaseTool))
@@ -323,12 +323,12 @@ class ToolModuleTests(unittest.TestCase):
         # can include for the agent context.
         from pathlib import Path as _P
         prompt_path = (
-            _P("/a0/usr/plugins/pushover/prompts")
-            / "fw.pushover.tool.md"
+            _P("/a0/usr/plugins/push_zero/prompts")
+            / "fw.push_zero.tool.md"
         )
         self.assertTrue(prompt_path.exists())
         text = prompt_path.read_text(encoding="utf-8")
-        self.assertIn("pushover_notify", text.lower())
+        self.assertIn("push_zero_notify", text.lower())
 
 
 if __name__ == "__main__":

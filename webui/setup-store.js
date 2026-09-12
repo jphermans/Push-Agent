@@ -2,7 +2,7 @@ import { createStore } from "/js/AlpineStore.js";
 import * as API from "/js/api.js";
 import { toastFrontendError, toastFrontendSuccess, toastFrontendInfo, toastFrontendWarning } from "/components/notifications/notification-store.js";
 
-const API_BASE = "/api/plugins/pushover";
+const API_BASE = "/api/plugins/push_zero";
 
 const PRIORITY_OPTIONS = [
   { value: "lowest", label: "Lowest (-2)" },
@@ -44,7 +44,7 @@ async function post(endpoint, payload = {}) {
   return data;
 }
 
-export const store = createStore("pushoverSetup", {
+export const store = createStore("push_zeroSetup", {
   loading: false,
   saving: false,
   testing: false,

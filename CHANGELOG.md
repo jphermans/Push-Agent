@@ -9,6 +9,42 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 _(no changes yet)_
 
+## [1.1.0] - 2026-09-12
+
+### Changed
+- **Plugin renamed from `pushover` to `push_zero`** for trademark
+  hygiene (the previously-reserved `pushover` slug was reserved for
+  the third-party service of the same name; the new slug keeps the
+  "push + _zero" cadence without occupying the trademark).
+- Migrated every slug reference in a single atomic commit:
+  - directory `/a0/usr/plugins/pushover/` →
+    `/a0/usr/plugins/push_zero/`
+  - `plugin.yaml` `name: pushover` → `name: push_zero`
+  - `helpers/pushover_client.py` → `helpers/push_zero_client.py`
+  - `tools/pushover_notify.py`    → `tools/push_zero_notify.py`
+  - `prompts/fw.pushover.tool.md` → `prompts/fw.push_zero.tool.md`
+  - Python imports `usr.plugins.pushover.*` →
+    `usr.plugins.push_zero.*` (every helpers/tools/api/test file)
+  - `helpers/config_helper.py` `PLUGIN_NAME` constant (`pushover` →
+    `push_zero`)
+  - `hooks.py` Logger name (`plugin.pushover` → `plugin.push_zero`)
+  - API route group `/api/plugins/pushover` → `/api/plugins/push_zero`
+  - WebUI asset URL `/plugins/pushover/webui/setup-store.js` →
+    `/plugins/push_zero/webui/setup-store.js`
+  - Alpine store handle `pushoverSetup` → `push_zeroSetup`
+  - Debug log labels `[pushover]` → `[push_zero]`
+
+### Notes
+- **Display strings preserved**: the prose word "Pushover" (the third
+  party service name) is unchanged throughout. Only the **plugin
+  slug** was renamed.
+- **No runtime semantic change.** All 49 unit tests still pass.
+- The user still needs to replace the `created_by` / `author` /
+  `homepage` TODO placeholders in `plugin.yaml` and the
+  `TODO-OWNER` placeholder in `index.yaml` once the GitHub owner is
+  resolved.
+
+
 ## [1.0.5] - 2026-09-12
 
 ### Added
@@ -22,17 +58,17 @@ _(no changes yet)_
   five tags). The runtime never reads it — `agent0ai/a0-plugins`
   does. Includes an inline publication checklist and the
   current field-size limits from `references/contribute.md`.
-  The `github:` value defaults to `TODO-OWNER/pushover` so
+  The `github:` value defaults to `TODO-OWNER/push_zero` so
   accidental publication is impossible until the user overwrites
   it.
 - **Local git repository** initialised inside
-  `/a0/usr/plugins/pushover/`, with every production file
+  `/a0/usr/plugins/push_zero/`, with every production file
   staged and a single GPG-less commit. The commit author uses a
   neutral placeholder identity so the user can `git commit
   --amend --reset-author` (or the equivalent `user.name`/`email`
   `git config`) before `git remote add origin … && git push`.
 - **Portable release artefact** at
-  `/a0/usr/plugins/pushover/dist/pushover-1.0.5.tar.gz` so the
+  `/a0/usr/plugins/push_zero/dist/push_zero-1.0.5.tar.gz` so the
   plugin can be shared without a GitHub remote.
 
 ### Notes
@@ -131,7 +167,7 @@ _(no changes yet)_
 
 ### Added
 - Initial release of the Pushover plugin for Agent Zero.
-- Agent-callable tool `pushover_notify` with actions `send`, `test`,
+- Agent-callable tool `push_zero_notify` with actions `send`, `test`,
   `receipt_status`, `cancel`, `cancel_by_tag`.
 - Dedicated Setup page at `webui/setup.html` with first-run onboarding,
   Test Connection, Send Test Notification, Notification Defaults,
@@ -139,23 +175,23 @@ _(no changes yet)_
   and Help sections.
 - Persistent plugin configuration via
   `helpers.plugins.get_plugin_config` / `save_plugin_config`.
-- HTTPS Pushover client at `helpers/pushover_client.py` (urgency,
+- HTTPS Pushover client at `helpers/push_zero_client.py` (urgency,
   sounds, limits, receipts, cancellation, masked credentials,
   humanised errors, DNS/timeout/TLS handling).
 - Validation helper `helpers/validation.py` covering message, title,
   priority, sound, device, URL, URL title, TTL, HTML/monospace
   conflict, tags, and emergency retry/expire bounds.
 - API handlers under `api/`:
-  - `POST /api/plugins/pushover/validate`
-  - `POST /api/plugins/pushover/test`
-  - `GET  /api/plugins/pushover/sounds`
-  - `GET  /api/plugins/pushover/limits`
-  - `POST /api/plugins/pushover/save`
-  - `POST /api/plugins/pushover/reset`
-  - `GET  /api/plugins/pushover/status`
-  - `POST /api/plugins/pushover/test_notify`
+  - `POST /api/plugins/push_zero/validate`
+  - `POST /api/plugins/push_zero/test`
+  - `GET  /api/plugins/push_zero/sounds`
+  - `GET  /api/plugins/push_zero/limits`
+  - `POST /api/plugins/push_zero/save`
+  - `POST /api/plugins/push_zero/reset`
+  - `GET  /api/plugins/push_zero/status`
+  - `POST /api/plugins/push_zero/test_notify`
 - Lifecycle hooks (`hooks.py`) for `install`, `pre_update`, `uninstall`.
-- System-prompt fragment `prompts/fw.pushover.tool.md`.
+- System-prompt fragment `prompts/fw.push_zero.tool.md`.
 - Test suite (49 tests across `test_client.py`, `test_validation.py`,
   `test_tool.py`, `test_config_helper.py`, `test_emergency_default.py`).
 

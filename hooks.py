@@ -15,9 +15,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from usr.plugins.pushover.helpers.config_helper import reset_config
+from usr.plugins.push_zero.helpers.config_helper import reset_config
 
-log = logging.getLogger("plugin.pushover")
+log = logging.getLogger("plugin.push_zero")
 
 
 def install() -> None:

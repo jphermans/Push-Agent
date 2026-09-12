@@ -1,4 +1,4 @@
-"""Status API handler (``POST /api/plugins/pushover/status``).
+"""Status API handler (``POST /api/plugins/push_zero/status``).
 
 Returns the current setup status snapshot: credentials presence (masked),
 defaults, emergency settings, and a few advanced settings. Useful for
@@ -11,7 +11,7 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_masked_config,
     status_snapshot,
 )

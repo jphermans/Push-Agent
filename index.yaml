@@ -10,7 +10,7 @@
 #   2. Update `github:` below to that URL.
 #   3. Fork https://github.com/agent0ai/a0-plugins.
 #   4. Copy this file (renamed to `index.yaml`) into
-#      `plugins/pushover/index.yaml` in your fork and a copy of
+#      `plugins/push_zero/index.yaml` in your fork and a copy of
 #      `thumbnail.png` beside it.
 #   5. Update `screenshots:` once you have screen captures.
 #   6. Run scripts/validate_plugin_submission.py from the Index repo
@@ -27,7 +27,7 @@
 
 title: Pushover
 description: Send push notifications from Agent Zero through Pushover. Includes an agent-callable notification tool, a dedicated Setup page, connection testing, emergency notifications with receipts, devices, sounds, URLs, TTL and application API usage.
-github: https://github.com/TODO-OWNER/pushover
+github: https://github.com/TODO-OWNER/push_zero
 tags:
   - notifications
   - tools

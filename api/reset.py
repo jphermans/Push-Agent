@@ -11,7 +11,7 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import reset_config
+from usr.plugins.push_zero.helpers.config_helper import reset_config
 
 
 class Reset(ApiHandler):

@@ -12,10 +12,10 @@ import copy
 from typing import Any
 
 from helpers import plugins as core_plugins
-from usr.plugins.pushover.helpers.pushover_client import mask_identifier
+from usr.plugins.push_zero.helpers.push_zero_client import mask_identifier
 
 
-PLUGIN_NAME: str = "pushover"
+PLUGIN_NAME: str = "push_zero"
 
 
 def get_raw_config(agent: Any | None = None) -> dict[str, Any]:

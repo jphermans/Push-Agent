@@ -1,4 +1,4 @@
-"""API usage handler (``POST /api/plugins/pushover/limits``).
+"""API usage handler (``POST /api/plugins/push_zero/limits``).
 
 Probes Pushover's ``/1/apps/limits.json`` endpoint to show monthly
 message counts and quota. The Pushover docs do not document this as a
@@ -15,12 +15,12 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_credentials,
     get_raw_config,
     is_configured,
 )
-from usr.plugins.pushover.helpers.pushover_client import PushoverClient
+from usr.plugins.push_zero.helpers.push_zero_client import PushoverClient
 
 
 class Limits(ApiHandler):

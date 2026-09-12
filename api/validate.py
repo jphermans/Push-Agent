@@ -1,4 +1,4 @@
-"""Settings validation API handler (``POST /api/plugins/pushover/validate``).
+"""Settings validation API handler (``POST /api/plugins/push_zero/validate``).
 
 Validates a candidate Pushover configuration without persisting it. Useful
 for the Setup page when the user wants to test field values before
@@ -13,8 +13,8 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.pushover_client import validate_url
-from usr.plugins.pushover.helpers.validation import build_message_payload
+from usr.plugins.push_zero.helpers.push_zero_client import validate_url
+from usr.plugins.push_zero.helpers.validation import build_message_payload
 
 
 class Validate(ApiHandler):
@@ -61,7 +61,7 @@ class Validate(ApiHandler):
         priority = (input.get("priority") or "").strip().lower()
         if priority == "emergency":
             try:
-                from usr.plugins.pushover.helpers.pushover_client import (
+                from usr.plugins.push_zero.helpers.push_zero_client import (
                     validate_emergency_retry,
                     validate_emergency_expire,
                 )

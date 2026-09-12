@@ -1,4 +1,4 @@
-Pushover notification tool: `pushover_notify`.
+Pushover notification tool: `push_zero_notify`.
 
 Use this tool to send a Pushover notification on behalf of Agent Zero.
 The Pushover integration must already be configured on the Agent Zero

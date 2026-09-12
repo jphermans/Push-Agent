@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from usr.plugins.pushover.helpers.pushover_client import (
+from usr.plugins.push_zero.helpers.push_zero_client import (
     normalize_priority,
     priority_label,
     stringify_tags,

@@ -16,13 +16,13 @@ from unittest import mock
 
 # Ensure the framework helpers are reachable as ``helpers`` (not the
 # plugin-local ``usr.plugins.<name>.helpers``) and the plugin namespace
-# ``usr.plugins.pushover.*`` is importable.
+# ``usr.plugins.push_zero.*`` is importable.
 ROOT_DIR = Path("/a0")
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from usr.plugins.pushover.helpers import pushover_client
-from usr.plugins.pushover.helpers.pushover_client import (
+from usr.plugins.push_zero.helpers import push_zero_client
+from usr.plugins.push_zero.helpers.push_zero_client import (
     PRIORITY_FRIENDLY,
     PushoverClient,
     PushoverResult,
@@ -184,7 +184,7 @@ class ClientSendMessageTests(unittest.TestCase):
             captured["data"] = req.data.decode("utf-8") if req.data else None
             return FakeResponse({"status": 1, "request": "abcd1234"})
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.send_message(
                 {
                     "message": "Hello",
@@ -213,7 +213,7 @@ class ClientSendMessageTests(unittest.TestCase):
                 io.BytesIO(json.dumps({"status": 0, "errors": ["invalid user key"]}).encode("utf-8")),
             )
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.send_message({"message": "Hello"})
         self.assertFalse(result.success)
         self.assertEqual(result.status, 400)
@@ -223,7 +223,7 @@ class ClientSendMessageTests(unittest.TestCase):
         def fake_urlopen(req, **kwargs):
             raise TimeoutError("timed out")
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.send_message({"message": "Hello"})
         self.assertFalse(result.success)
         self.assertIn("timed out", result.error.lower())
@@ -232,7 +232,7 @@ class ClientSendMessageTests(unittest.TestCase):
         def fake_urlopen(req, **kwargs):
             raise urllib.error.URLError("Name or service not known")
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.send_message({"message": "Hello"})
         self.assertFalse(result.success)
         self.assertIn("dns", result.error.lower())
@@ -241,7 +241,7 @@ class ClientSendMessageTests(unittest.TestCase):
         def fake_urlopen(req, **kwargs):
             return FakeResponse("this is not json", status=200)
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.send_message({"message": "Hello"})
         self.assertFalse(result.success)
         self.assertIn("malformed", result.error.lower())
@@ -250,7 +250,7 @@ class ClientSendMessageTests(unittest.TestCase):
         def fake_urlopen(req, **kwargs):
             return FakeResponse({"status": 1, "sounds": {"magic": "Magic", "bike": "Bike"}})
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.list_sounds()
         self.assertTrue(result.success)
         self.assertIn("sounds", result.data)
@@ -264,7 +264,7 @@ class ClientSendMessageTests(unittest.TestCase):
                 "acknowledged_at": 1234567890,
             })
 
-        with mock.patch.object(pushover_client.urllib.request, "urlopen", side_effect=fake_urlopen):
+        with mock.patch.object(push_zero_client.urllib.request, "urlopen", side_effect=fake_urlopen):
             result = self.client.get_receipt("deadbeef")
         self.assertTrue(result.success)
         self.assertTrue(result.data.get("acknowledged"))

@@ -1,4 +1,4 @@
-"""Save-config API handler (``POST /api/plugins/pushover/save``).
+"""Save-config API handler (``POST /api/plugins/push_zero/save``).
 
 Persists the Setup page configuration in the global Pushover plugin scope.
 The handler refuses to accept empty ``token`` or ``user`` fields once the
@@ -15,7 +15,7 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_credentials,
     get_raw_config,
     save_config,

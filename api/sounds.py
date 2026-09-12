@@ -1,4 +1,4 @@
-"""Sounds API handler (``POST /api/plugins/pushover/sounds``).
+"""Sounds API handler (``POST /api/plugins/push_zero/sounds``).
 
 Returns the list of available Pushover sounds so the Setup page can
 populate the "Default Sound" dropdown. The default "User default" entry
@@ -11,12 +11,12 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_credentials,
     get_raw_config,
     is_configured,
 )
-from usr.plugins.pushover.helpers.pushover_client import PushoverClient
+from usr.plugins.push_zero.helpers.push_zero_client import PushoverClient
 
 
 class Sounds(ApiHandler):

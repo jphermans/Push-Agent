@@ -1,4 +1,4 @@
-"""Send test notification API handler (``POST /api/plugins/pushover/test_notify``).
+"""Send test notification API handler (``POST /api/plugins/push_zero/test_notify``).
 
 Sends a default "Test Notification" using the configured Pushover
 defaults. Failures return a structured response with a human-readable
@@ -13,13 +13,13 @@ from flask import Request
 
 from helpers.api import ApiHandler
 
-from usr.plugins.pushover.helpers.config_helper import (
+from usr.plugins.push_zero.helpers.config_helper import (
     get_credentials,
     get_raw_config,
     is_configured,
 )
-from usr.plugins.pushover.helpers.pushover_client import PushoverClient
-from usr.plugins.pushover.helpers.validation import build_message_payload
+from usr.plugins.push_zero.helpers.push_zero_client import PushoverClient
+from usr.plugins.push_zero.helpers.validation import build_message_payload
 
 
 class TestNotify(ApiHandler):
