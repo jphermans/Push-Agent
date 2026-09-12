@@ -720,3 +720,18 @@ _(no changes yet)_
 - `get_masked_config()` is used inside `status_snapshot()` so the API response never leaks the plaintext token / user (replaced with the same masked display shown on the Setup page).
 - No API contract changes for tools / tests; this is a purely Setup-page UX bug fix.
 - `api/save.py` was already persisting the defaults correctly (verified); the bug was purely on the read path.
+
+
+## [1.1.18] - 2026-09-12
+
+### Critical
+- **Non-credential fields vanished on save+reopen.** Even with 1.1.17's read-path fix exposing the full masked config under `data.config`, the JS still saw `data.config = {}` because the A0 runtime hadn't reloaded the cached helper module. To make persistence verifiable on disk and resilient to module-cache stalls, this release introduces an explicit **plugin-local JSON file** as the PRIMARY configuration store:
+  - `<plugin_dir>/push_zero_config.json` — primary; written atomically on every save, read first on every page load.
+  - The framework's `core_plugins.save_plugin_config` storage is now the SECONDARY mirror; both stores are kept in sync.
+- `helpers/config_helper.py:get_raw_config()` now reads the local file first and only falls back to framework storage when the local file is missing. The user can verify their saved values by reading `push_zero_config.json` directly.
+
+### Notes
+- The local JSON file is written atomically (`tmp + os.replace`) so a crash mid-write can never leave a half-written file.
+- File mode is normalised to 0644 on every write so the A0 runtime (running as a non-root user) can read it.
+- `reset_config()` now also deletes the local file so the next read starts from defaults.
+- All three paths (read, write, hydrate) verified end-to-end via direct Python invocation in the runtime harness.
