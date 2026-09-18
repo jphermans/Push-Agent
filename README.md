@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/AUTH_LOGIN/Push-Agent"><img src="https://img.shields.io/badge/repo-Push--Agent-2A5C8F?style=for-the-badge&logo=github" alt="Repository" /></a>
-  <a href="#"><img src="https://img.shields.io/badge/version-1.1.22-E74C3C?style=for-the-badge" alt="Version" /></a>
+  <a href="#"><img src="https://img.shields.io/badge/version-1.2.0-E74C3C?style=for-the-badge" alt="Version" /></a>
   <a href="#"><img src="https://img.shields.io/badge/license-MIT-28a745?style=for-the-badge" alt="License" /></a>
   <a href="#"><img src="https://img.shields.io/badge/Agent_Zero-compatible-2A5C8F?style=for-the-badge" alt="Agent Zero compatibility" /></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.10%2B-f39c12?style=for-the-badge&logo=python" alt="Python" /></a>
@@ -397,4 +397,56 @@ The Setup page reads from disk on open; writes go to both layers on Save; the pa
 
 ---
 
-<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.1.24.</sub>
+<sub>Built with the `a0-create-plugin` skill workflow. Shipped at v1.2.0.</sub>
+
+
+---
+
+## Plugin Hub Submission (v1.2.0)
+
+This release is structurally Hub-ready (manifest version, README Hub section, CHANGELOG entry, LICENSE, thumbnail, tests), but the GitHub owner identity is left as a `TODO` placeholder for you to substitute locally before opening the Hub PR.
+
+### Required local edit before submitting
+
+In `plugin.yaml`, replace the three TODO lines:
+
+```yaml
+created_by: "TODO: replace with your name and contact"
+author: "TODO: replace with your name"
+homepage: "TODO: replace with your plugin/docs URL"
+```
+
+with your real values, for example:
+
+```yaml
+created_by: "Your Name <you@example.com>"
+author: "Your Name"
+homepage: "https://github.com/YOUR-OWNER/Push-Agent"
+```
+
+In `index.yaml`, change the `github:` line from the placeholder to your real repo URL:
+
+```yaml
+github: https://github.com/YOUR-OWNER/Push-Agent
+```
+
+### Steps to submit to the Hub
+
+1. Fork https://github.com/agent0ai/a0-plugins.
+2. Copy `index.yaml` from this repo into `plugins/push_zero/index.yaml` in your fork.
+3. Copy `thumbnail.png` from this repo into `plugins/push_zero/thumbnail.png` in your fork.
+4. Copy `webui/thumbnail.png` from this repo into `plugins/push_zero/webui/thumbnail.png` in your fork.
+5. Optionally add screenshots under `plugins/push_zero/screenshots/`.
+6. Run `scripts/validate_plugin_submission.py` from the Index repo against your pushed branch.
+7. Open a PR from your fork to `agent0ai/a0-plugins:main`.
+
+### Hub field limits (per current Index README)
+
+- title: up to 50 chars
+- description: up to 500 chars
+- index.yaml total: up to 2000 chars
+- tags: up to 5
+- screenshots: up to 5, each less than or equal to 2 MB
+- thumbnail: less than or equal to 20 KB, square PNG/JPEG/WebP
+
+See `SETUP.md` for installation and `SECURITY.md` for the credential-handling policy.

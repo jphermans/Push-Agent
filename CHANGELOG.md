@@ -7,6 +7,20 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 
 
+## [1.2.0] - 2026-09-18
+
+### Distribution
+
+- Plugin Hub submission preparation: version bumped to 1.2.0; README Hub Submission section added with explicit TODO instructions for the GitHub owner identity.
+- `plugin.yaml` author, created_by, and homepage fields intentionally left as TODO placeholders so the user can substitute their real GitHub owner locally before opening the Hub PR.
+- `index.yaml` github URL intentionally left as a placeholder for the same reason.
+- This is a non-functional release: no runtime behavior changed from v1.1.24.
+
+### Compatibility
+
+- No code changes. The runtime behavior is identical to v1.1.24.
+
+
 ## [1.1.24] - 2026-09-12
 
 ### Bug fix
