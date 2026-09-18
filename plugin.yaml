@@ -1,7 +1,7 @@
 name: push_zero
 title: Pushover
 description: Send push notifications from Agent Zero through the Pushover API. Includes an agent-callable notification tool, a dedicated Setup page, connection testing, emergency notifications with receipts, and support for devices, sounds, URLs, TTL, and application API usage.
-version: "1.2.2"
+version: "1.2.3"
 created_by: "jphermans <jphermans@users.noreply.github.com>"
 author: "jphermans"
 homepage: "https://github.com/jphermans/Push-Agent"

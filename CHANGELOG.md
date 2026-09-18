@@ -7,6 +7,15 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 
 
+## [1.2.3] - 2026-09-18
+
+### Fix
+
+- Final corrective: aggressive regex substitution ensures index.yaml and README.md references to the GitHub owner are fully replaced.
+- All manifest values now reflect the real owner identity.
+- Hub submission PR attempt follows in next commit (pending PAT scope resolution).
+
+
 ## [1.2.2] - 2026-09-18
 
 ### Fix
