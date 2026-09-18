@@ -7,6 +7,15 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 
 
+## [1.2.1] - 2026-09-18
+
+### Distribution
+
+- Owner substitution completed: plugin.yaml author/created_by/homepage and index.yaml github URL set to https://github.com/jphermans/Push-Agent.
+- Hub submission PR opened against agent0ai/a0-plugins.
+- Version bumped 1.2.0 -> 1.2.1.
+
+
 ## [1.2.0] - 2026-09-18
 
 ### Distribution

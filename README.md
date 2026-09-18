@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/AUTH_LOGIN/Push-Agent"><img src="https://img.shields.io/badge/repo-Push--Agent-2A5C8F?style=for-the-badge&logo=github" alt="Repository" /></a>
+  <a href="https://github.com/jphermans/Push-Agent"><img src="https://img.shields.io/badge/repo-Push--Agent-2A5C8F?style=for-the-badge&logo=github" alt="Repository" /></a>
   <a href="#"><img src="https://img.shields.io/badge/version-1.2.0-E74C3C?style=for-the-badge" alt="Version" /></a>
   <a href="#"><img src="https://img.shields.io/badge/license-MIT-28a745?style=for-the-badge" alt="License" /></a>
   <a href="#"><img src="https://img.shields.io/badge/Agent_Zero-compatible-2A5C8F?style=for-the-badge" alt="Agent Zero compatibility" /></a>
@@ -293,7 +293,7 @@ The plugin's `hooks.py` is idempotent and clean — no orphan files, no schema r
 
 ## 🔗 Links
 
-- **Repo:** `https://github.com/AUTH_LOGIN/Push-Agent`
+- **Repo:** `https://github.com/jphermans/Push-Agent`
 - **Index entry:** `https://github.com/agent0ai/a0-plugins/blob/main/plugins/push_zero/index.yaml` (post-PR)
 - **Pushover docs:** `https://pushover.net/`<wbr/>`api`
 - **Agent Zero:** `https://github.com/agent0ai/agent-zero`
@@ -411,9 +411,9 @@ This release is structurally Hub-ready (manifest version, README Hub section, CH
 In `plugin.yaml`, replace the three TODO lines:
 
 ```yaml
-created_by: "TODO: replace with your name and contact"
-author: "TODO: replace with your name"
-homepage: "TODO: replace with your plugin/docs URL"
+created_by: "jphermans <jphermans@users.noreply.github.com>"
+author: "jphermans"
+homepage: "https://github.com/jphermans/Push-Agent"
 ```
 
 with your real values, for example:
