@@ -7,6 +7,14 @@ and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.ht
 
 
 
+## [1.2.2] - 2026-09-18
+
+### Fix
+
+- Corrective release: v1.2.1 substitution did not match the longer TODO string format in plugin.yaml. v1.2.2 uses regex-based substitution.
+- Hub submission PR re-attempted.
+
+
 ## [1.2.1] - 2026-09-18
 
 ### Distribution
