@@ -12,6 +12,8 @@ provide masked representations for safe display in the UI.
 
 from __future__ import annotations
 
+import json
+import os
 from dataclasses import dataclass
 from typing import Optional
 
@@ -28,6 +30,12 @@ CONFIG_KEY = "pushover"
 # Path to the bundled default_config.yaml used as a fallback when no
 # plugin configuration has been saved yet.
 DEFAULT_CONFIG_PATH = "/a0/usr/plugins/pushover/default_config.yaml"
+
+# Local plugin-owned config file. This is the canonical source of truth
+# for non-secret settings (timeout, default title, priority). Using a
+# local file avoids triggering Agent Zero's plugin module reload, which
+# previously caused HTTP 500 errors on save.
+LOCAL_CONFIG_PATH = "/a0/usr/plugins/pushover/pushover_config.json"
 
 # Pushover enforces a 512-character message body limit. The agent tool
 # truncates longer messages to keep the API call valid.
@@ -100,6 +108,56 @@ def _load_default_config() -> dict:
 def load_default_config() -> dict:
     """Public wrapper for loading the bundled default configuration."""
     return _load_default_config()
+
+
+def load_local_config() -> dict:
+    """Load the plugin-owned local configuration file.
+
+    This file is the canonical source of truth for non-secret settings
+    (timeout, default title, priority). Reading from a local file avoids
+    triggering Agent Zero's plugin module reload that the framework
+    ``get_plugin_config`` path can produce.
+    """
+    try:
+        with open(LOCAL_CONFIG_PATH, "r", encoding="utf-8") as fh:
+            data = json.load(fh) or {}
+    except FileNotFoundError:
+        return {}
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    return data
+
+
+def save_local_config(settings: dict) -> dict:
+    """Persist non-secret settings to the plugin-owned local config file.
+
+    The write is atomic: settings are written to a sibling ``.tmp`` file
+    and then ``os.replace`` is used so partial writes never overwrite the
+    previous configuration.
+    """
+    safe: dict = {}
+    if isinstance(settings, dict):
+        for key, value in settings.items():
+            if isinstance(value, (str, int, float, bool)) or value is None:
+                safe[key] = value
+    tmp_path = LOCAL_CONFIG_PATH + ".tmp"
+    try:
+        os.makedirs(os.path.dirname(LOCAL_CONFIG_PATH), exist_ok=True)
+        with open(tmp_path, "w", encoding="utf-8") as fh:
+            json.dump(safe, fh, indent=2, sort_keys=True)
+            fh.write("\n")
+        os.replace(tmp_path, LOCAL_CONFIG_PATH)
+    except OSError:
+        # As a last resort, try a non-atomic write.
+        try:
+            with open(LOCAL_CONFIG_PATH, "w", encoding="utf-8") as fh:
+                json.dump(safe, fh, indent=2, sort_keys=True)
+                fh.write("\n")
+        except OSError:
+            pass
+    return safe
 
 
 def resolve_credentials(

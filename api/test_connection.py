@@ -15,7 +15,10 @@ from helpers.api import ApiHandler
 from helpers.plugins import get_plugin_config
 from helpers.secrets import get_secrets_manager
 
-from usr.plugins.pushover.helpers.config_helper import resolve_credentials
+from usr.plugins.pushover.helpers.config_helper import (
+    load_local_config,
+    resolve_credentials,
+)
 from usr.plugins.pushover.helpers.pushover_client import (
     PUSHOVER_API_ENDPOINT,
     PushoverClient,
@@ -26,9 +29,15 @@ class TestConnectionHandler(ApiHandler):
     """Verify that the configured credentials can reach the Pushover API."""
 
     async def process(self, input: dict, request) -> dict:
-        settings = get_plugin_config(self.name) or {}
-        if not isinstance(settings, dict):
-            settings = {}
+        local_config = load_local_config()
+        if not local_config:
+            try:
+                local_config = get_plugin_config(self.name) or {}
+            except Exception:
+                local_config = {}
+        if not isinstance(local_config, dict):
+            local_config = {}
+
         try:
             secrets = get_secrets_manager().load_secrets()
         except Exception:
@@ -36,7 +45,7 @@ class TestConnectionHandler(ApiHandler):
         if not isinstance(secrets, dict):
             secrets = {}
 
-        resolved = resolve_credentials(saved_config=settings, secrets=secrets)
+        resolved = resolve_credentials(saved_config=local_config, secrets=secrets)
         if not resolved.is_configured:
             return {
                 "success": False,
@@ -89,3 +98,6 @@ class TestConnectionHandler(ApiHandler):
             "endpoint": PUSHOVER_API_ENDPOINT,
             "http_status": result.http_status,
         }
+
+
+__all__ = ["TestConnectionHandler"]

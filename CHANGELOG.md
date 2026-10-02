@@ -5,6 +5,36 @@ All notable changes to the Pushover plugin are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.0.2] - Save fix
+
+### Fixed
+
+- **HTTP 500 on save and test notification.** The `save.py` handler
+  previously called `helpers.plugins.save_plugin_config` with the
+  framework's `project_name` and `agent_profile` attributes. When both
+  are empty (the normal state for the Setup page), the framework's
+  plugin-config write path triggers a frontend reload and a plugin
+  module refresh, which surfaced as HTTP 500 in the browser and which
+  also caused the subsequent `Send Test Notification` call to fail
+  because the reload invalidated the in-memory handler binding.
+
+- The fix stores non-secret settings (request timeout, default title,
+  priority) in a plugin-owned local JSON file at
+  `pushover_config.json` instead of going through
+  `save_plugin_config`. The framework's `get_plugin_config` is still
+  honoured as a fallback for legacy callers, but the local file is the
+  canonical source of truth.
+
+- Atomic write of the local config file: a `.tmp` sibling is written
+  first and then `os.replace`'d over the live file so partial writes
+  never corrupt the saved configuration.
+
+- `parse_env_content` was previously fed back into `save_secrets`,
+  which would have written a Python `dict` to the secrets store. The
+  save handler now serialises the merged secrets to the `KEY="value"`
+  format before calling `save_secrets`, matching the contract of the
+  Agent Zero secret store.
+
 ## [0.0.1] - Initial release
 
 ### Added

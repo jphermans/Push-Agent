@@ -6,16 +6,24 @@ from helpers.api import ApiHandler
 from helpers.plugins import get_plugin_config
 from helpers.secrets import get_secrets_manager
 
-from usr.plugins.pushover.helpers.config_helper import status_snapshot
+from usr.plugins.pushover.helpers.config_helper import (
+    load_local_config,
+    status_snapshot,
+)
 
 
 class StatusHandler(ApiHandler):
     """Return masked credentials, configuration summary and a configured flag."""
 
     async def process(self, input: dict, request) -> dict:
-        settings = get_plugin_config(self.name) or {}
-        if not isinstance(settings, dict):
-            settings = {}
+        local_config = load_local_config()
+        if not local_config:
+            try:
+                local_config = get_plugin_config(self.name) or {}
+            except Exception:
+                local_config = {}
+        if not isinstance(local_config, dict):
+            local_config = {}
 
         try:
             secrets = get_secrets_manager().load_secrets()
@@ -24,8 +32,11 @@ class StatusHandler(ApiHandler):
         if not isinstance(secrets, dict):
             secrets = {}
 
-        snapshot = status_snapshot(saved_config=settings, secrets=secrets)
+        snapshot = status_snapshot(saved_config=local_config, secrets=secrets)
         snapshot["message"] = (
             "Pushover is configured." if snapshot["configured"] else "Pushover is not configured."
         )
         return {"success": True, "status": snapshot}
+
+
+__all__ = ["StatusHandler"]

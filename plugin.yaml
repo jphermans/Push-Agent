@@ -1,7 +1,7 @@
 name: pushover
 title: Pushover
 description: Send a Pushover notification to the user when the user explicitly asks to be notified. The agent decides to call the tool only after the user has requested a Pushover notification.
-version: "0.0.1"
+version: "0.0.2"
 author: Push-Agent
 license: MIT
 tags:
