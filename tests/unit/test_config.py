@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from usr.plugins.pushover.helpers.config_helper import (
     DEFAULT_CONFIG_PATH,
+    PLUGIN_VERSION,
     PUSHOVER_MAX_MESSAGE_LEN,
     SECRET_API_TOKEN_KEY,
     SECRET_USER_KEY,
@@ -84,3 +85,11 @@ def test_status_snapshot_never_includes_raw_secrets():
     assert "raw" not in snapshot
     assert "api_token" not in snapshot
     assert "user_key" not in snapshot
+
+
+def test_status_snapshot_exposes_plugin_version():
+    snapshot = status_snapshot()
+    assert snapshot["version"] == PLUGIN_VERSION
+    # Version is a non-empty semver-ish string the UI can show directly.
+    assert snapshot["version"]
+    assert "." in snapshot["version"]

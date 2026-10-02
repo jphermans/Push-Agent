@@ -37,6 +37,11 @@ DEFAULT_CONFIG_PATH = "/a0/usr/plugins/pushover/default_config.yaml"
 # previously caused HTTP 500 errors on save.
 LOCAL_CONFIG_PATH = "/a0/usr/plugins/pushover/pushover_config.json"
 
+# Plugin version. Surfaced through the Setup page so the user can
+# confirm they are on the release they expect. Bump this in lockstep
+# with `plugin.yaml`'s `version` field.
+PLUGIN_VERSION = "0.0.4"
+
 # Pushover enforces a 512-character message body limit. The agent tool
 # truncates longer messages to keep the API call valid.
 PUSHOVER_MAX_MESSAGE_LEN = 512
@@ -205,11 +210,13 @@ def status_snapshot(
     """Return a UI-safe status snapshot.
 
     The snapshot never contains raw secret values. Use ``mask_credential``
-    for any display rendering.
+    for any display rendering. The ``version`` field exposes the running
+    plugin version so the Setup page can show which release is installed.
     """
     resolved = resolve_credentials(saved_config=saved_config, secrets=secrets)
     return {
         "configured": resolved.is_configured,
+        "version": PLUGIN_VERSION,
         "request_timeout": resolved.request_timeout,
         "priority": resolved.priority,
         "default_title": resolved.default_title,
