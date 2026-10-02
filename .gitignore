@@ -1,0 +1,35 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local configuration overrides
+config.local.json
+config.local.yaml
+*.local.json
+*.local.yaml
+
+# Local credential stores (defence in depth — credentials belong in
+# Agent Zero's secret store, not in tracked files)
+secrets.env
+secrets.local.env
+*.credentials.json
+*.credentials.yaml
+
+# Editor / IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Build artifacts
+dist/
+build/
+*.whl
+
+# OS files
+Thumbs.db

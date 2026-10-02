@@ -1,0 +1,205 @@
+<html>
+<head>
+    <title>Pushover</title>
+    <script type="module">
+        import { fetchApi } from "/js/api.js";
+        import { toastFrontendSuccess, toastFrontendError, toastFrontendWarning } from "/components/notifications/notification-store.js";
+        window._pushover = { fetchApi, toastFrontendSuccess, toastFrontendError, toastFrontendWarning };
+    </script>
+</head>
+<body>
+    <div x-data="{
+        status: null,
+        apiToken: '',
+        userKey: '',
+        requestTimeout: 10,
+        defaultTitle: 'Agent Zero',
+        busy: false,
+        showToken: false,
+        showUserKey: false,
+
+        init() {
+            this.refreshStatus();
+        },
+
+        async refreshStatus() {
+            try {
+                const res = await window._pushover.fetchApi('/api/plugins/pushover/status');
+                if (res && res.ok) {
+                    const data = await res.json();
+                    this.status = (data && data.status) || null;
+                    if (this.status) {
+                        this.requestTimeout = this.status.request_timeout || 10;
+                        this.defaultTitle = this.status.default_title || 'Agent Zero';
+                    }
+                } else {
+                    this.status = null;
+                }
+            } catch (e) {
+                this.status = null;
+            }
+        },
+
+        statusLabel() {
+            if (!this.status) return 'Unknown';
+            return this.status.configured ? 'Connected' : 'Not configured';
+        },
+
+        statusColor() {
+            if (!this.status) return 'text-yellow-500';
+            return this.status.configured ? 'text-green-500' : 'text-red-500';
+        },
+
+        async save() {
+            if (this.busy) return;
+            if (!this.apiToken || !this.userKey) {
+                window._pushover.toastFrontendError('Both Application/API Token and User/Group Key are required.', 'Pushover');
+                return;
+            }
+            this.busy = true;
+            try {
+                const res = await window._pushover.fetchApi('/api/plugins/pushover/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        api_token: this.apiToken,
+                        user_key: this.userKey,
+                        request_timeout: parseInt(this.requestTimeout, 10) || 10,
+                        default_title: this.defaultTitle || 'Agent Zero',
+                    }),
+                });
+                if (!res || !res.ok) {
+                    window._pushover.toastFrontendError('Save failed (HTTP ' + (res ? res.status : 'no response') + ').', 'Pushover');
+                    return;
+                }
+                const data = await res.json();
+                if (data && data.success) {
+                    window._pushover.toastFrontendSuccess('Pushover credentials saved.', 'Pushover');
+                    this.apiToken = '';
+                    this.userKey = '';
+                    this.showToken = false;
+                    this.showUserKey = false;
+                    await this.refreshStatus();
+                } else {
+                    window._pushover.toastFrontendError((data && data.message) || 'Save failed.', 'Pushover');
+                }
+            } catch (e) {
+                window._pushover.toastFrontendError('Save error: ' + (e.message || 'Unknown error'), 'Pushover');
+            } finally {
+                this.busy = false;
+            }
+        },
+
+        async testConnection() {
+            if (this.busy) return;
+            this.busy = true;
+            window._pushover.toastFrontendWarning('Testing connection to Pushover...', 'Pushover');
+            try {
+                const res = await window._pushover.fetchApi('/api/plugins/pushover/test_connection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                });
+                if (!res) {
+                    window._pushover.toastFrontendError('No response from server.', 'Pushover');
+                    return;
+                }
+                const data = await res.json().catch(() => ({}));
+                if (data && data.success) {
+                    window._pushover.toastFrontendSuccess((data && data.message) || 'Connection successful.', 'Pushover');
+                } else {
+                    window._pushover.toastFrontendError((data && data.message) || ('Connection test failed (HTTP ' + res.status + ').'), 'Pushover');
+                }
+            } catch (e) {
+                window._pushover.toastFrontendError('Test connection error: ' + (e.message || 'Unknown error'), 'Pushover');
+            } finally {
+                this.busy = false;
+            }
+        },
+
+        async sendTestNotification() {
+            if (this.busy) return;
+            this.busy = true;
+            window._pushover.toastFrontendWarning('Sending test notification...', 'Pushover');
+            try {
+                const res = await window._pushover.fetchApi('/api/plugins/pushover/test_notification', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                });
+                if (!res) {
+                    window._pushover.toastFrontendError('No response from server.', 'Pushover');
+                    return;
+                }
+                const data = await res.json().catch(() => ({}));
+                if (data && data.success) {
+                    window._pushover.toastFrontendSuccess((data && data.message) || 'Test notification sent.', 'Pushover');
+                } else {
+                    window._pushover.toastFrontendError((data && data.message) || ('Test notification failed (HTTP ' + res.status + ').'), 'Pushover');
+                }
+            } catch (e) {
+                window._pushover.toastFrontendError('Test notification error: ' + (e.message || 'Unknown error'), 'Pushover');
+            } finally {
+                this.busy = false;
+            }
+        },
+    }" class="space-y-4">
+
+        <h2 class="text-lg font-semibold">Pushover</h2>
+        <p class="text-sm opacity-80">
+            Send a Pushover notification to the user when the user explicitly asks to be notified.
+            The agent calls <code>pushover_notify</code> only after the user has requested a Pushover
+            notification; nothing is sent automatically.
+        </p>
+
+        <div class="flex items-center gap-2">
+            <span class="font-medium">Status:</span>
+            <span :class="statusColor()" x-text="statusLabel()"></span>
+        </div>
+
+        <div x-show="status && status.masked_token" class="text-xs opacity-70">
+            Token: <span x-text="status && status.masked_token"></span>
+        </div>
+        <div x-show="status && status.masked_user_key" class="text-xs opacity-70">
+            User Key: <span x-text="status && status.masked_user_key"></span>
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-sm font-medium">Application/API Token</label>
+            <div class="flex gap-2">
+                <input :type="showToken ? 'text' : 'password'" x-model="apiToken" class="input input-bordered w-full" autocomplete="off" placeholder="Application/API Token">
+                <button type="button" class="btn btn-sm" @click="showToken = !showToken" x-text="showToken ? 'Hide' : 'Show'"></button>
+            </div>
+        </div>
+
+        <div class="space-y-2">
+            <label class="block text-sm font-medium">User / Group Key</label>
+            <div class="flex gap-2">
+                <input :type="showUserKey ? 'text' : 'password'" x-model="userKey" class="input input-bordered w-full" autocomplete="off" placeholder="User / Group Key">
+                <button type="button" class="btn btn-sm" @click="showUserKey = !showUserKey" x-text="showUserKey ? 'Hide' : 'Show'"></button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+                <label class="block text-sm font-medium">Request timeout (seconds)</label>
+                <input type="number" min="1" max="60" x-model.number="requestTimeout" class="input input-bordered w-full">
+            </div>
+            <div class="space-y-2">
+                <label class="block text-sm font-medium">Default title</label>
+                <input type="text" x-model="defaultTitle" class="input input-bordered w-full">
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-2">
+            <button type="button" class="btn btn-primary" :disabled="busy" @click="save()">Save Configuration</button>
+            <button type="button" class="btn" :disabled="busy" @click="testConnection()">Test Connection</button>
+            <button type="button" class="btn" :disabled="busy" @click="sendTestNotification()">Send Test Notification</button>
+        </div>
+
+        <p class="text-xs opacity-60 pt-2">
+            Credentials are stored in Agent Zero's secret store and are never sent to the browser after the first save.
+        </p>
+    </div>
+</body>
+</html>

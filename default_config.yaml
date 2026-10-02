@@ -1,0 +1,11 @@
+# Default settings for the Pushover plugin.
+#
+# Credentials (Application/API Token and User/Group Key) are stored only in
+# Agent Zero's secret store, never in this file or in plugin.yaml.
+#
+# request_timeout: seconds to wait for the Pushover API to respond.
+# priority: 0 means normal priority (the only level supported in v0.1.0).
+
+request_timeout: 10
+priority: 0
+default_title: "Agent Zero"
