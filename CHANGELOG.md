@@ -5,6 +5,27 @@ All notable changes to the Pushover plugin are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.0.5] - HTTP 500 on save fully fixed
+
+### Fixed
+
+- **HTTP 500 on save for multi-file secrets setups.** The
+  `save_secrets` call was raising an unhandled `RuntimeError` on
+  Agent Zero deployments where the secret manager tracks more than
+  one secrets file (e.g. global `/a0/usr/.env` plus the project's
+  `/a0/usr/projects/<name>/.a0proj/secrets.env`). The secret manager
+  refuses to write in that mode so it doesn't have to pick which file
+  to mutate. The Pushover save handler now catches that
+  `RuntimeError` and falls back to writing the two plugin keys
+  (`PUSHOVER_API_TOKEN`, `PUSHOVER_USER_KEY`) directly to the
+  project's `.a0proj/secrets.env` file, preserving any other keys
+  already in the file. The save endpoint now returns
+  `{"success": true, ...}` instead of HTTP 500 on these deployments.
+
+- **Defensive try/except** around every side effect in the save
+  handler so a single failure (secrets store, file I/O, snapshot
+  building) can never crash the request into an unhandled 500.
+
 ## [0.0.4] - Version visible in Setup
 
 ### Added
