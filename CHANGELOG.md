@@ -5,6 +5,17 @@ All notable changes to the Pushover plugin are recorded here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.0.3] - Icon refresh
+
+### Changed
+
+- Replaced the placeholder notification icon with a more polished
+  design that combines an Agent Zero tech aesthetic (cyan/blue
+  gradient background, subtle corner network nodes) with a clear
+  notification motif (white bell with red status dot). The new
+  thumbnail matches the visual language of other Agent Zero plugin
+  cards in the Settings page.
+
 ## [0.0.2] - Save fix
 
 ### Fixed

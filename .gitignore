@@ -15,6 +15,7 @@ config.local.yaml
 *.local.yaml
 pushover_config.json
 pushover_config.json.tmp
+config.json
 
 # Local credential stores (defence in depth — credentials belong in
 # Agent Zero's secret store, not in tracked files)
